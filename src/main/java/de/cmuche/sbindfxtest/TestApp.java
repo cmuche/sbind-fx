@@ -1,11 +1,20 @@
 package de.cmuche.sbindfxtest;
 
-public class TestApp
+import javafx.application.Application;
+import javafx.stage.Stage;
+
+public class TestApp extends Application
 {
-  public static void main(String[] args) throws IllegalAccessException
+  public static void main(String[] args)
   {
     TestController controller = new TestController();
     controller.initialize();
     System.out.println(controller.getDataValue("foo.bar.strField"));
+  }
+
+  @Override
+  public void start(Stage primaryStage) throws Exception
+  {
+
   }
 }

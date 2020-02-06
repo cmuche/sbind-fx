@@ -1,5 +1,12 @@
 package de.cmuche.sbindfx;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.scene.control.Control;
 import lombok.SneakyThrows;
 
 import java.lang.reflect.Field;
@@ -11,7 +18,7 @@ import java.util.Map;
 public abstract class SbindController
 {
   private Map<String, Object> dataSources;
-  private Map<String, SbindControl> dataControls;
+  private Map<String, SbindProperty> dataControls;
 
   @SneakyThrows
   public void initialize()
@@ -25,8 +32,25 @@ public abstract class SbindController
         dataSources.put(f.getName(), f.get(this));
 
       if (f.getDeclaredAnnotation(SbindControl.class) != null)
-        dataControls.put(f.getName(), f.getDeclaredAnnotation(SbindControl.class));
+      {
+        SbindControl ann = f.getDeclaredAnnotation(SbindControl.class);
+        Control control = (Control) f.get(this);
+        Property fxProp = new SimpleObjectProperty();
+        bindControlProperty(control, ann.property(), fxProp);
+        SbindProperty prop = new SbindProperty(control, ann.property(), ann.expression(), fxProp);
+        dataControls.put(f.getName(), prop);
+      }
     }
+  }
+
+  @SneakyThrows
+  private void bindControlProperty(Control control, String propertyName, Property property)
+  {
+    String methodName = (propertyName + "property").toLowerCase();
+    Method[] methods = control.getClass().getMethods();
+    Method m = Arrays.asList(methods).stream().filter(x -> x.getName().toLowerCase().equals(methodName)).findFirst().orElse(null);
+    Property controlProp = ((Property) m.invoke(control));
+    controlProp.bindBidirectional(property);
   }
 
   @SneakyThrows

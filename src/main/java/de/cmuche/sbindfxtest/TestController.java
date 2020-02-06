@@ -20,5 +20,7 @@ public class TestController extends SbindController
     bar.setStrField("Bar String");
     foo.setStrField("Foo String");
     foo.setBar(bar);
+
+    lblFoo = new Label();
   }
 }
