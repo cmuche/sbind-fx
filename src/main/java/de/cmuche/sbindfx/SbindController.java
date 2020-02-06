@@ -99,7 +99,11 @@ public abstract class SbindController
     String[] exParts = splitExpression(expression);
     Object currentObj = dataSources.get(exParts[0]);
     for (int i = 1; i < exParts.length; i++)
+    {
       currentObj = getObjectField(currentObj, exParts[i]);
+      if (currentObj == null)
+        return null;
+    }
     return currentObj;
   }
 
