@@ -3,15 +3,20 @@ package de.cmuche.sbindfxtest;
 import de.cmuche.sbindfx.SbindControl;
 import de.cmuche.sbindfx.SbindController;
 import de.cmuche.sbindfx.SbindData;
-import javafx.scene.control.Label;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.TextField;
 
 public class TestController extends SbindController
 {
   @SbindData
   public Foo foo;
 
+  @SbindControl(property = "text", expression = "foo.strField")
+  public TextField lblFoo;
+
   @SbindControl(property = "text", expression = "foo.bar.strField")
-  public Label lblFoo;
+  public TextField lblBar;
 
   public TestController()
   {
@@ -20,7 +25,11 @@ public class TestController extends SbindController
     bar.setStrField("Bar String");
     foo.setStrField("Foo String");
     foo.setBar(bar);
+  }
 
-    lblFoo = new Label();
+  @FXML
+  private void click(ActionEvent event) throws Exception
+  {
+    System.out.println(foo);
   }
 }
