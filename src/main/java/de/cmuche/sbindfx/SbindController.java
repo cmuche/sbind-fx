@@ -37,6 +37,8 @@ public abstract class SbindController
         dataControls.put(f.getName(), prop);
       }
     }
+
+    changed();
   }
 
   //TODO private
@@ -61,6 +63,12 @@ public abstract class SbindController
     }
   }
 
+  private void valueChanged(Control control, Object newValue)
+  {
+    SbindProperty sProp = dataControls.values().stream().filter(x -> x.getControl() == control).findFirst().orElse(null);
+    setDataValue(sProp.getExpression(), newValue);
+  }
+
   @SneakyThrows
   private void bindControlProperty(Control control, String propertyName, Property property)
   {
@@ -71,6 +79,7 @@ public abstract class SbindController
       .findFirst().orElse(null);
     Property controlProp = ((Property) m.invoke(control));
     controlProp.bindBidirectional(property);
+    controlProp.addListener((observable, oldValue, newValue) -> valueChanged(control, newValue));
   }
 
   @SneakyThrows
@@ -84,13 +93,13 @@ public abstract class SbindController
   }
 
   @SneakyThrows
-  private Object setObjectField(Object o, String field, Object data)
+  private void setObjectField(Object o, String field, Object data)
   {
     String mName = ("set" + field).toLowerCase();
     Method method = Arrays.asList(o.getClass().getDeclaredMethods()).stream()
       .filter(x -> x.getName().toLowerCase().equals(mName) && x.getParameterCount() == 1)
       .findFirst().orElse(null);
-    return method.invoke(o, data);
+    method.invoke(o, data);
   }
 
   //TODO private
@@ -112,12 +121,13 @@ public abstract class SbindController
     return expression.split("\\.");
   }
 
-  public Object setDataValue(String expression, Object data)
+  public void setDataValue(String expression, Object data)
   {
     String[] exParts = splitExpression(expression);
     Object currentObj = dataSources.get(exParts[0]);
-    for (int i = 1; i < exParts.length; i++)
-      currentObj = setObjectField(currentObj, exParts[i], data);
-    return currentObj;
+    for (int i = 1; i < exParts.length - 1; i++)
+      currentObj = getObjectField(currentObj, exParts[i]);
+
+    setObjectField(currentObj, exParts[exParts.length - 1], data);
   }
 }
