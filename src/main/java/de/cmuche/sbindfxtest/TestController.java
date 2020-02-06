@@ -10,7 +10,7 @@ public class TestController extends SbindController
   @SbindData
   public Foo foo;
 
-  @SbindControl(property = "text", expression = "foo.strField")
+  @SbindControl(property = "text", expression = "foo.bar.strField")
   public Label lblFoo;
 
   public TestController()
