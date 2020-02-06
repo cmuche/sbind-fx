@@ -1,11 +1,7 @@
 package de.cmuche.sbindfx;
 
-import javafx.beans.InvalidationListener;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Control;
 import lombok.SneakyThrows;
 
@@ -37,9 +33,31 @@ public abstract class SbindController
         Control control = (Control) f.get(this);
         Property fxProp = new SimpleObjectProperty();
         bindControlProperty(control, ann.property(), fxProp);
-        SbindProperty prop = new SbindProperty(control, ann.property(), ann.expression(), fxProp);
+        SbindProperty prop = new SbindProperty(control, ann.expression(), ann.property(), fxProp);
         dataControls.put(f.getName(), prop);
       }
+    }
+  }
+
+  //TODO private
+  public void changed()
+  {
+    for (Map.Entry<String, Object> f : dataSources.entrySet())
+      changed(f.getKey());
+  }
+
+  protected void changed(String field)
+  {
+    for (Map.Entry<String, SbindProperty> d : dataControls.entrySet())
+    {
+      SbindProperty prop = d.getValue();
+      String expBase = splitExpression(prop.getExpression())[0];
+
+      if (!expBase.equals(field))
+        continue;
+
+      Object val = getDataValue(prop.getExpression());
+      prop.getFxProperty().setValue(val);
     }
   }
 
@@ -48,7 +66,9 @@ public abstract class SbindController
   {
     String methodName = (propertyName + "property").toLowerCase();
     Method[] methods = control.getClass().getMethods();
-    Method m = Arrays.asList(methods).stream().filter(x -> x.getName().toLowerCase().equals(methodName)).findFirst().orElse(null);
+    Method m = Arrays.asList(methods).stream()
+      .filter(x -> x.getName().toLowerCase().equals(methodName))
+      .findFirst().orElse(null);
     Property controlProp = ((Property) m.invoke(control));
     controlProp.bindBidirectional(property);
   }
@@ -63,12 +83,37 @@ public abstract class SbindController
     return method.invoke(o);
   }
 
+  @SneakyThrows
+  private Object setObjectField(Object o, String field, Object data)
+  {
+    String mName = ("set" + field).toLowerCase();
+    Method method = Arrays.asList(o.getClass().getDeclaredMethods()).stream()
+      .filter(x -> x.getName().toLowerCase().equals(mName) && x.getParameterCount() == 1)
+      .findFirst().orElse(null);
+    return method.invoke(o, data);
+  }
+
+  //TODO private
   public Object getDataValue(String expression)
   {
-    String[] exParts = expression.split("\\.");
+    String[] exParts = splitExpression(expression);
     Object currentObj = dataSources.get(exParts[0]);
     for (int i = 1; i < exParts.length; i++)
       currentObj = getObjectField(currentObj, exParts[i]);
+    return currentObj;
+  }
+
+  private String[] splitExpression(String expression)
+  {
+    return expression.split("\\.");
+  }
+
+  public Object setDataValue(String expression, Object data)
+  {
+    String[] exParts = splitExpression(expression);
+    Object currentObj = dataSources.get(exParts[0]);
+    for (int i = 1; i < exParts.length; i++)
+      currentObj = setObjectField(currentObj, exParts[i], data);
     return currentObj;
   }
 }

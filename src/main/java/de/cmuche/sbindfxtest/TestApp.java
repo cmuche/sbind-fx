@@ -10,6 +10,7 @@ public class TestApp extends Application
     TestController controller = new TestController();
     controller.initialize();
     System.out.println(controller.getDataValue("foo.bar.strField"));
+    controller.changed();
   }
 
   @Override
