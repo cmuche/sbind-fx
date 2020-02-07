@@ -28,5 +28,11 @@ public class TestController extends SbindController
     foo.setBar(bar);
     foo.setDateField(new Date());
   }
+
+  public void setFoo(Foo foo)
+  {
+    this.foo = foo;
+    changed("foo");
+  }
 }
 ```

@@ -42,4 +42,10 @@ public class TestController extends SbindController
   {
     System.out.println(foo);
   }
+
+  public void setFoo(Foo foo)
+  {
+    this.foo = foo;
+    changed("foo");
+  }
 }
