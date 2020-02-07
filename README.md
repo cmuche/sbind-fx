@@ -15,6 +15,10 @@ public class TestController extends SbindController
   @SbindControl(property = "text", expression = "foo.bar.strField")
   public TextField lblBar;
 
+  @FXML
+  @SbindControl(property = "value", expression = "foo.dateField", converter = DateConverter.class)
+  public DatePicker dapBaz;
+
   public TestController()
   {
     foo = new Foo();
@@ -22,8 +26,7 @@ public class TestController extends SbindController
     bar.setStrField("Bar String");
     foo.setStrField("Foo String");
     foo.setBar(bar);
-
-    lblFoo = new Label();
+    foo.setDateField(new Date());
   }
 }
 ```
