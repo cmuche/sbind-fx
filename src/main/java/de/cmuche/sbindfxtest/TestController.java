@@ -8,6 +8,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
 
+import java.util.Date;
+
 public class TestController extends SbindController
 {
   @SbindData
@@ -21,9 +23,9 @@ public class TestController extends SbindController
   @SbindControl(property = "text", expression = "foo.bar.strField")
   public TextField lblBar;
 
-  /*@FXML
-  @SbindControl(property = "text", expression = "foo.bar.strField")
-  public DatePicker dapBaz;*/
+  @FXML
+  @SbindControl(property = "value", expression = "foo.dateField", converter = DateConverter.class)
+  public DatePicker dapBaz;
 
   public TestController()
   {
@@ -32,7 +34,7 @@ public class TestController extends SbindController
     bar.setStrField("Bar String");
     foo.setStrField("Foo String");
     foo.setBar(bar);
-
+    foo.setDateField(new Date());
   }
 
   @FXML
