@@ -15,12 +15,14 @@ public abstract class SbindController
 {
   private Map<String, Object> dataSources;
   private Map<String, SbindProperty> dataControls;
+  private Map<Control, SbindConverter> dataConverters;
 
   @SneakyThrows
   public void initialize()
   {
     dataSources = new HashMap<>();
     dataControls = new HashMap<>();
+    dataConverters = new HashMap<>();
 
     for (Field f : getClass().getDeclaredFields())
     {
@@ -33,12 +35,26 @@ public abstract class SbindController
         Control control = (Control) f.get(this);
         Property fxProp = new SimpleObjectProperty();
         bindControlProperty(control, ann.property(), fxProp);
-        SbindProperty prop = new SbindProperty(control, ann.expression(), ann.property(), fxProp);
+        SbindConverter converter = generateConverter(ann.converter());
+
+        SbindProperty prop = new SbindProperty(control, ann.expression(), ann.property(), fxProp, converter);
+
         dataControls.put(f.getName(), prop);
+        dataConverters.put(control, converter);
       }
     }
 
     changed();
+  }
+
+  @SneakyThrows
+  private SbindConverter generateConverter(Class converterClass)
+  {
+    if (converterClass == Object.class)
+      return new SbindNullConverter();
+
+    Object converter = converterClass.getConstructor().newInstance();
+    return (SbindConverter) converter;
   }
 
   protected void changed()
@@ -58,14 +74,15 @@ public abstract class SbindController
         continue;
 
       Object val = getDataValue(prop.getExpression());
-      prop.getFxProperty().setValue(val);
+      prop.getFxProperty().setValue(dataConverters.get(prop.getControl()).convert(val));
     }
   }
 
   private void valueChanged(Control control, Object newValue)
   {
     SbindProperty sProp = dataControls.values().stream().filter(x -> x.getControl() == control).findFirst().orElse(null);
-    setDataValue(sProp.getExpression(), newValue);
+    Object convertedValue = dataConverters.get(control).back(newValue);
+    setDataValue(sProp.getExpression(), convertedValue);
   }
 
   @SneakyThrows

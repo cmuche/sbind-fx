@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/10.0.2-internal"
-            xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.cmuche.sbindfxtest.TestController">
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.cmuche.sbindfxtest.TestController">
     <children>
-        <Button fx:id="btnClick" layoutX="10.0" layoutY="10.0"  onAction="#click" text="Button" />
-        <TextField fx:id="lblFoo" layoutX="166.0" layoutY="10.0" />
-        <TextField fx:id="lblBar" layoutX="166.0" layoutY="50.0" />
+        <Button fx:id="btnClick" layoutX="10.0" layoutY="10.0" onAction="#click" text="Button" />
+        <TextField fx:id="lblFoo" layoutX="150.0" layoutY="10.0" />
+        <TextField fx:id="lblBar" layoutX="150.0" layoutY="50.0" />
+      <DatePicker fx:id="dapBaz" layoutX="150.0" layoutY="90.0" />
     </children>
 </AnchorPane>

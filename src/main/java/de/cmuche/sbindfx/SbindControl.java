@@ -9,4 +9,6 @@ public @interface SbindControl
   String expression();
 
   String property();
+
+  Class converter() default Object.class;
 }
