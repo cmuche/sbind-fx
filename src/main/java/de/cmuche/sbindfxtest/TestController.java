@@ -60,7 +60,11 @@ public class TestController extends SbindController
     list.add("three");
     foo.setListField(list);
 
-    foo.setBaz(new Baz("one", "two", "three"));
+    List<Baz> bList = new ArrayList<>();
+    bList.add(new Baz("one", "two", "three"));
+    bList.add(new Baz("four", "five", "six"));
+    bList.add(new Baz("seven", "eight", "nine"));
+    foo.setBaz(bList);
   }
 
   @FXML

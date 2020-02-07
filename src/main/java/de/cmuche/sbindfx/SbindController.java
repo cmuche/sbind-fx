@@ -4,11 +4,14 @@ import de.cmuche.sbindfx.annotations.SbindColumn;
 import de.cmuche.sbindfx.annotations.SbindControl;
 import de.cmuche.sbindfx.annotations.SbindData;
 import de.cmuche.sbindfx.annotations.SbindTable;
+import de.cmuche.sbindfxtest.ListConverter;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.Control;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.util.Callback;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -30,8 +33,17 @@ public abstract class SbindController
     dataControls = new HashSet<>();
     dataConverters = new HashMap<>();
 
+    //DATA
     for (Field f : getClass().getDeclaredFields())
     {
+      for (Annotation ann : f.getDeclaredAnnotations())
+      {
+        if (ann instanceof SbindData)
+          if (f.getDeclaredAnnotation(SbindData.class) != null)
+            dataSources.put(f.getName(), f.get(this));
+      }
+
+      //CONTROLS
       for (Annotation ann : f.getDeclaredAnnotations())
       {
         if (ann instanceof SbindControl)
@@ -47,11 +59,13 @@ public abstract class SbindController
           dataControls.add(prop);
           dataConverters.put(Pair.of(control, annCtl.property()), converter);
         }
-        else if (ann instanceof SbindTable)
+      }
+
+      //TABLES
+      for (Annotation ann : f.getDeclaredAnnotations())
+      {
+        if (ann instanceof SbindTable)
           initializeTable((TableView) f.get(this), (SbindTable) ann);
-        else if (ann instanceof SbindData)
-          if (f.getDeclaredAnnotation(SbindData.class) != null)
-            dataSources.put(f.getName(), f.get(this));
       }
     }
 
@@ -60,14 +74,34 @@ public abstract class SbindController
 
   private void initializeTable(TableView tableView, SbindTable ann)
   {
+    Property fxProp = new SimpleObjectProperty();
+    bindControlProperty(tableView, "items", fxProp);
+    SbindProperty prop = new SbindProperty(tableView, ann.expression(), "items", fxProp, new ListConverter());
+    dataControls.add(prop);
+    dataConverters.put(Pair.of(tableView,"items"), new ListConverter());
+
     for (SbindColumn colAnn : ann.columns())
     {
       TableColumn col = new TableColumn(colAnn.title());
       tableView.getColumns().add(col);
 
-      for(SbindControl bindAnn:colAnn.bindings())
+      for (SbindControl bindAnn : colAnn.bindings())
       {
+        col.setCellFactory(new Callback<TableColumn, TableCell>()
+        {
+          @Override
+          public TableCell call(TableColumn param)
+          {
+            int columnIndex = param.getTableView().getColumns().indexOf(param);
+            Object dataObject = param.getTableView().getItems().get(columnIndex);
+            Object dataValue = getDataValue(bindAnn.expression(), getObjectField(dataObject, splitExpression(bindAnn.expression())[0]));
 
+            TableCell<Object, Object> tc = new TableCell<>();
+            SbindConverter converter = generateConverter(bindAnn.converter());
+            tc.setText(converter.convert(dataValue).toString());
+            return tc;
+          }
+        });
       }
     }
   }
@@ -97,7 +131,7 @@ public abstract class SbindController
       if (!expBase.equals(field))
         continue;
 
-      Object val = getDataValue(prop.getExpression());
+      Object val = getDataValue(prop.getExpression(), dataSources.get(splitExpression(prop.getExpression())[0]));
       prop.getFxProperty().setValue(dataConverters.get(Pair.of(prop.getControl(), prop.getProperty())).convert(val));
     }
   }
@@ -142,10 +176,10 @@ public abstract class SbindController
     method.invoke(o, data);
   }
 
-  private Object getDataValue(String expression)
+  private Object getDataValue(String expression, Object o)
   {
     String[] exParts = splitExpression(expression);
-    Object currentObj = dataSources.get(exParts[0]);
+    Object currentObj = o;
     for (int i = 1; i < exParts.length; i++)
     {
       currentObj = getObjectField(currentObj, exParts[i]);
