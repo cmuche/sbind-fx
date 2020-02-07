@@ -41,8 +41,7 @@ public abstract class SbindController
     changed();
   }
 
-  //TODO private
-  public void changed()
+  protected void changed()
   {
     for (Map.Entry<String, Object> f : dataSources.entrySet())
       changed(f.getKey());
@@ -102,8 +101,7 @@ public abstract class SbindController
     method.invoke(o, data);
   }
 
-  //TODO private
-  public Object getDataValue(String expression)
+  private Object getDataValue(String expression)
   {
     String[] exParts = splitExpression(expression);
     Object currentObj = dataSources.get(exParts[0]);
