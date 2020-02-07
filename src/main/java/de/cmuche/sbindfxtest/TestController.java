@@ -22,8 +22,6 @@ public class TestController extends SbindController
   @SbindData
   public Foo foo;
 
-  public Color color = Color.RED;
-
   @FXML
   @SbindControl(property = "text", expression = "foo.strField", converter = CaseConverter.class)
   public TextField lblFoo;

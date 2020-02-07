@@ -1,8 +1,6 @@
 package de.cmuche.sbindfx;
 
 import javafx.beans.property.Property;
-import javafx.scene.control.Control;
-import javafx.util.StringConverter;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -10,7 +8,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class SbindProperty
 {
-  private Control control;
+  private Object control;
   private String expression;
   private String property;
   private Property fxProperty;

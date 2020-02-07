@@ -15,33 +15,26 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public abstract class SbindController
 {
   private Map<String, Object> dataSources;
-  private Map<String, SbindProperty> dataControls;
-  private Map<Pair<Control, String>, SbindConverter> dataConverters;
+  private Set<SbindProperty> dataControls;
+  private Map<Pair<Object, String>, SbindConverter> dataConverters;
 
   @SneakyThrows
   public void initialize()
   {
     dataSources = new HashMap<>();
-    dataControls = new HashMap<>();
+    dataControls = new HashSet<>();
     dataConverters = new HashMap<>();
 
     for (Field f : getClass().getDeclaredFields())
     {
       for (Annotation ann : f.getDeclaredAnnotations())
       {
-        if (ann instanceof SbindData)
-        {
-          if (f.getDeclaredAnnotation(SbindData.class) != null)
-            dataSources.put(f.getName(), f.get(this));
-        }
-        else if (ann instanceof SbindControl)
+        if (ann instanceof SbindControl)
         {
           SbindControl annCtl = (SbindControl) ann;
           Control control = (Control) f.get(this);
@@ -51,15 +44,15 @@ public abstract class SbindController
 
           SbindProperty prop = new SbindProperty(control, annCtl.expression(), annCtl.property(), fxProp, converter);
 
-          dataControls.put(f.getName(), prop);
+          dataControls.add(prop);
           dataConverters.put(Pair.of(control, annCtl.property()), converter);
         }
         else if (ann instanceof SbindTable)
-        {
           initializeTable((TableView) f.get(this), (SbindTable) ann);
-        }
+        else if (ann instanceof SbindData)
+          if (f.getDeclaredAnnotation(SbindData.class) != null)
+            dataSources.put(f.getName(), f.get(this));
       }
-
     }
 
     changed();
@@ -72,7 +65,10 @@ public abstract class SbindController
       TableColumn col = new TableColumn(colAnn.title());
       tableView.getColumns().add(col);
 
+      for(SbindControl bindAnn:colAnn.bindings())
+      {
 
+      }
     }
   }
 
@@ -94,28 +90,27 @@ public abstract class SbindController
 
   protected void changed(String field)
   {
-    for (Map.Entry<String, SbindProperty> d : dataControls.entrySet())
+    for (SbindProperty prop : dataControls)
     {
-      SbindProperty prop = d.getValue();
       String expBase = splitExpression(prop.getExpression())[0];
 
       if (!expBase.equals(field))
         continue;
 
       Object val = getDataValue(prop.getExpression());
-      prop.getFxProperty().setValue(dataConverters.get(prop.getControl()).convert(val));
+      prop.getFxProperty().setValue(dataConverters.get(Pair.of(prop.getControl(), prop.getProperty())).convert(val));
     }
   }
 
-  private void valueChanged(Control control, String propName, Object newValue)
+  private void valueChanged(Object control, String propName, Object newValue)
   {
-    SbindProperty sProp = dataControls.values().stream().filter(x -> x.getControl() == control).findFirst().orElse(null);
+    SbindProperty sProp = dataControls.stream().filter(x -> x.getControl() == control).findFirst().orElse(null);
     Object convertedValue = dataConverters.get(Pair.of(control, propName)).back(newValue);
     setDataValue(sProp.getExpression(), convertedValue);
   }
 
   @SneakyThrows
-  private void bindControlProperty(Control control, String propertyName, Property property)
+  private void bindControlProperty(Object control, String propertyName, Property property)
   {
     String methodName = (propertyName + "property").toLowerCase();
     Method[] methods = control.getClass().getMethods();
