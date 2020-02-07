@@ -1,5 +1,5 @@
 # sBind-FX
-## Simple JavaFX Data Binding
+## Simple JavaFX *bidirectional* Data Binding
 
 ```
 public class TestController extends SbindController
