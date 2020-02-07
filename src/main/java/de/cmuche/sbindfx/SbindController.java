@@ -7,8 +7,8 @@ import de.cmuche.sbindfx.annotations.SbindTable;
 import de.cmuche.sbindfxtest.ListConverter;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Control;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.util.Callback;
@@ -25,6 +25,7 @@ public abstract class SbindController
   private Map<String, Object> dataSources;
   private Set<SbindProperty> dataControls;
   private Map<Pair<Object, String>, SbindConverter> dataConverters;
+  private Set<Pair<TableView, SbindTable>> dataTables;
 
   @SneakyThrows
   public void initialize()
@@ -32,6 +33,7 @@ public abstract class SbindController
     dataSources = new HashMap<>();
     dataControls = new HashSet<>();
     dataConverters = new HashMap<>();
+    dataTables = new HashSet<>();
 
     //DATA
     for (Field f : getClass().getDeclaredFields())
@@ -65,11 +67,16 @@ public abstract class SbindController
       for (Annotation ann : f.getDeclaredAnnotations())
       {
         if (ann instanceof SbindTable)
-          initializeTable((TableView) f.get(this), (SbindTable) ann);
+        {
+          TableView tableView = (TableView) f.get(this);
+          SbindTable bindAnn = (SbindTable) ann;
+          initializeTable(tableView, bindAnn);
+          dataTables.add(Pair.of(tableView, bindAnn));
+        }
       }
     }
 
-    changed();
+    changed(null);
   }
 
   private void initializeTable(TableView tableView, SbindTable ann)
@@ -78,7 +85,7 @@ public abstract class SbindController
     bindControlProperty(tableView, "items", fxProp);
     SbindProperty prop = new SbindProperty(tableView, ann.expression(), "items", fxProp, new ListConverter());
     dataControls.add(prop);
-    dataConverters.put(Pair.of(tableView,"items"), new ListConverter());
+    dataConverters.put(Pair.of(tableView, "items"), new ListConverter());
 
     for (SbindColumn colAnn : ann.columns())
     {
@@ -87,21 +94,20 @@ public abstract class SbindController
 
       for (SbindControl bindAnn : colAnn.bindings())
       {
-        col.setCellFactory(new Callback<TableColumn, TableCell>()
+        col.setCellValueFactory(new Callback<TableColumn.CellDataFeatures, ObservableValue>()
         {
           @Override
-          public TableCell call(TableColumn param)
+          public ObservableValue call(TableColumn.CellDataFeatures param)
           {
-            int columnIndex = param.getTableView().getColumns().indexOf(param);
-            Object dataObject = param.getTableView().getItems().get(columnIndex);
-            Object dataValue = getDataValue(bindAnn.expression(), getObjectField(dataObject, splitExpression(bindAnn.expression())[0]));
+            Object dataValue = getDataValue(bindAnn.expression(), getObjectField(param.getValue(), splitExpression(bindAnn.expression())[0]));
 
-            TableCell<Object, Object> tc = new TableCell<>();
             SbindConverter converter = generateConverter(bindAnn.converter());
-            tc.setText(converter.convert(dataValue).toString());
-            return tc;
+            SimpleObjectProperty fxProp = new SimpleObjectProperty(converter.convert(dataValue));
+            fxProp.addListener((observable, oldValue, newValue) -> valueChangedTable(ann.expression(), bindAnn.expression(), converter, newValue));
+            return fxProp;
           }
         });
+
       }
     }
   }
@@ -116,19 +122,13 @@ public abstract class SbindController
     return (SbindConverter) converter;
   }
 
-  protected void changed()
-  {
-    for (Map.Entry<String, Object> f : dataSources.entrySet())
-      changed(f.getKey());
-  }
-
   protected void changed(String field)
   {
     for (SbindProperty prop : dataControls)
     {
       String expBase = splitExpression(prop.getExpression())[0];
 
-      if (!expBase.equals(field))
+      if (field != null && !expBase.equals(field))
         continue;
 
       Object val = getDataValue(prop.getExpression(), dataSources.get(splitExpression(prop.getExpression())[0]));
@@ -141,6 +141,13 @@ public abstract class SbindController
     SbindProperty sProp = dataControls.stream().filter(x -> x.getControl() == control).findFirst().orElse(null);
     Object convertedValue = dataConverters.get(Pair.of(control, propName)).back(newValue);
     setDataValue(sProp.getExpression(), convertedValue);
+  }
+
+  private void valueChangedTable(String tableExpression, String columnExpression, SbindConverter converter, Object newValue)
+  {
+    String mergedExpression = tableExpression + "." + columnExpression;
+    Object convertedValue = converter.back(newValue);
+    setDataValue(mergedExpression, convertedValue);
   }
 
   @SneakyThrows

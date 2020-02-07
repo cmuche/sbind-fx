@@ -8,7 +8,7 @@ public @interface SbindControl
 {
   String expression();
 
-  String property();
+  String property() default "text";
 
   Class converter() default Object.class;
 }
