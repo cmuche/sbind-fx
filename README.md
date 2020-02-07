@@ -8,8 +8,12 @@ public class TestController extends SbindController
   public Foo foo;
 
   @FXML
+  @SbindControl(property = "text", expression = "foo.strField")
+  public TextField lblFoo;
+
+  @FXML
   @SbindControl(property = "text", expression = "foo.bar.strField")
-  public Label lblFoo;
+  public TextField lblBar;
 
   public TestController()
   {

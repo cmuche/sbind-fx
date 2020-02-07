@@ -12,9 +12,11 @@ public class TestController extends SbindController
   @SbindData
   public Foo foo;
 
+  @FXML
   @SbindControl(property = "text", expression = "foo.strField")
   public TextField lblFoo;
 
+  @FXML
   @SbindControl(property = "text", expression = "foo.bar.strField")
   public TextField lblBar;
 
