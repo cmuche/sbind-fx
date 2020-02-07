@@ -1,10 +1,18 @@
 package de.cmuche.sbindfx;
 
+import de.cmuche.sbindfx.annotations.SbindColumn;
+import de.cmuche.sbindfx.annotations.SbindControl;
+import de.cmuche.sbindfx.annotations.SbindData;
+import de.cmuche.sbindfx.annotations.SbindTable;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.Control;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.tuple.Pair;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -15,7 +23,7 @@ public abstract class SbindController
 {
   private Map<String, Object> dataSources;
   private Map<String, SbindProperty> dataControls;
-  private Map<Control, SbindConverter> dataConverters;
+  private Map<Pair<Control, String>, SbindConverter> dataConverters;
 
   @SneakyThrows
   public void initialize()
@@ -26,25 +34,46 @@ public abstract class SbindController
 
     for (Field f : getClass().getDeclaredFields())
     {
-      if (f.getDeclaredAnnotation(SbindData.class) != null)
-        dataSources.put(f.getName(), f.get(this));
-
-      if (f.getDeclaredAnnotation(SbindControl.class) != null)
+      for (Annotation ann : f.getDeclaredAnnotations())
       {
-        SbindControl ann = f.getDeclaredAnnotation(SbindControl.class);
-        Control control = (Control) f.get(this);
-        Property fxProp = new SimpleObjectProperty();
-        bindControlProperty(control, ann.property(), fxProp);
-        SbindConverter converter = generateConverter(ann.converter());
+        if (ann instanceof SbindData)
+        {
+          if (f.getDeclaredAnnotation(SbindData.class) != null)
+            dataSources.put(f.getName(), f.get(this));
+        }
+        else if (ann instanceof SbindControl)
+        {
+          SbindControl annCtl = (SbindControl) ann;
+          Control control = (Control) f.get(this);
+          Property fxProp = new SimpleObjectProperty();
+          bindControlProperty(control, annCtl.property(), fxProp);
+          SbindConverter converter = generateConverter(annCtl.converter());
 
-        SbindProperty prop = new SbindProperty(control, ann.expression(), ann.property(), fxProp, converter);
+          SbindProperty prop = new SbindProperty(control, annCtl.expression(), annCtl.property(), fxProp, converter);
 
-        dataControls.put(f.getName(), prop);
-        dataConverters.put(control, converter);
+          dataControls.put(f.getName(), prop);
+          dataConverters.put(Pair.of(control, annCtl.property()), converter);
+        }
+        else if (ann instanceof SbindTable)
+        {
+          initializeTable((TableView) f.get(this), (SbindTable) ann);
+        }
       }
+
     }
 
     changed();
+  }
+
+  private void initializeTable(TableView tableView, SbindTable ann)
+  {
+    for (SbindColumn colAnn : ann.columns())
+    {
+      TableColumn col = new TableColumn(colAnn.title());
+      tableView.getColumns().add(col);
+
+
+    }
   }
 
   @SneakyThrows
@@ -78,10 +107,10 @@ public abstract class SbindController
     }
   }
 
-  private void valueChanged(Control control, Object newValue)
+  private void valueChanged(Control control, String propName, Object newValue)
   {
     SbindProperty sProp = dataControls.values().stream().filter(x -> x.getControl() == control).findFirst().orElse(null);
-    Object convertedValue = dataConverters.get(control).back(newValue);
+    Object convertedValue = dataConverters.get(Pair.of(control, propName)).back(newValue);
     setDataValue(sProp.getExpression(), convertedValue);
   }
 
@@ -95,7 +124,7 @@ public abstract class SbindController
       .findFirst().orElse(null);
     Property controlProp = ((Property) m.invoke(control));
     controlProp.bindBidirectional(property);
-    controlProp.addListener((observable, oldValue, newValue) -> valueChanged(control, newValue));
+    controlProp.addListener((observable, oldValue, newValue) -> valueChanged(control, propertyName, newValue));
   }
 
   @SneakyThrows

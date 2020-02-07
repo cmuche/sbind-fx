@@ -1,14 +1,12 @@
-package de.cmuche.sbindfx;
+package de.cmuche.sbindfx.annotations;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
-public @interface SbindControl
+public @interface SbindTable
 {
   String expression();
 
-  String property();
-
-  Class converter() default Object.class;
+  SbindColumn[] columns();
 }
