@@ -12,10 +12,10 @@ import javafx.scene.control.TableView;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.Consumer;
 
 public abstract class SbindController
 {
@@ -24,7 +24,6 @@ public abstract class SbindController
   private Map<Pair<Object, String>, SbindConverter> dataConverters;
   private Set<Pair<TableView, SbindTable>> dataTables;
 
-  @SneakyThrows
   public void initialize()
   {
     dataSources = new HashMap<>();
@@ -32,48 +31,54 @@ public abstract class SbindController
     dataConverters = new HashMap<>();
     dataTables = new HashSet<>();
 
-    //DATA
     for (Field f : getClass().getDeclaredFields())
     {
-      for (Annotation ann : f.getDeclaredAnnotations())
+
+      //DATA
+      doForEachAnnotationWithType(f, SbindData.class, ann ->
       {
-        if (ann instanceof SbindData)
-          if (f.getDeclaredAnnotation(SbindData.class) != null)
-            dataSources.put(f.getName(), f.get(this));
-      }
+        if (f.getDeclaredAnnotation(SbindData.class) != null)
+          dataSources.put(f.getName(), getFieldInstance(f, this));
+      });
 
       //CONTROLS
-      for (Annotation ann : f.getDeclaredAnnotations())
+      doForEachAnnotationWithType(f, SbindControl.class, ann ->
       {
-        if (ann instanceof SbindControl)
-        {
-          SbindControl annCtl = (SbindControl) ann;
-          Object control = f.get(this);
-          Property fxProp = new SimpleObjectProperty();
-          bindControlProperty(control, annCtl.property(), fxProp, true);
-          SbindConverter converter = generateConverter(annCtl.converter());
+        SbindControl annCtl = (SbindControl) ann;
+        Object control = getFieldInstance(f, this);
+        Property fxProp = new SimpleObjectProperty();
+        bindControlProperty(control, annCtl.property(), fxProp, true);
+        SbindConverter converter = generateConverter(annCtl.converter());
 
-          SbindProperty prop = new SbindProperty(control, annCtl.expression(), annCtl.property(), fxProp, converter);
+        SbindProperty prop = new SbindProperty(control, annCtl.expression(), annCtl.property(), fxProp, converter);
 
-          dataControls.add(prop);
-          dataConverters.put(Pair.of(control, annCtl.property()), converter);
-        }
-      }
+        dataControls.add(prop);
+        dataConverters.put(Pair.of(control, annCtl.property()), converter);
+      });
 
       //TABLES
-      for (Annotation ann : f.getDeclaredAnnotations())
+      doForEachAnnotationWithType(f, SbindTable.class, ann ->
       {
-        if (ann instanceof SbindTable)
-        {
-          TableView tableView = (TableView) f.get(this);
-          SbindTable bindAnn = (SbindTable) ann;
-          initializeTable(tableView, bindAnn);
-          dataTables.add(Pair.of(tableView, bindAnn));
-        }
-      }
+        TableView tableView = (TableView) getFieldInstance(f, this);
+        SbindTable bindAnn = (SbindTable) ann;
+        initializeTable(tableView, bindAnn);
+        dataTables.add(Pair.of(tableView, bindAnn));
+      });
     }
 
     changed(null);
+  }
+
+  @SneakyThrows
+  private Object getFieldInstance(Field f, Object o)
+  {
+    return f.get(this);
+  }
+
+  @SneakyThrows
+  private void doForEachAnnotationWithType(Field field, Class annotaionClass, Consumer consumer)
+  {
+    Arrays.asList(field.getDeclaredAnnotations()).stream().filter(x -> annotaionClass.isInstance(x)).forEach(consumer);
   }
 
   private void initializeTable(TableView tableView, SbindTable ann)
