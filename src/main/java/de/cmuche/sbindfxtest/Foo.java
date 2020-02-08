@@ -2,6 +2,7 @@ package de.cmuche.sbindfxtest;
 
 import lombok.Data;
 
+import java.awt.*;
 import java.util.Date;
 import java.util.List;
 
@@ -13,4 +14,5 @@ public class Foo
   private Bar bar;
   private List<Baz> baz;
   private List<String> listField;
+  private Color color;
 }
