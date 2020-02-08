@@ -11,8 +11,8 @@ import de.cmuche.sbindfx.converters.ColorToPaintConverter;
 import de.cmuche.sbindfx.converters.DateToLocalDateConverter;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
 import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -37,9 +37,18 @@ public class TestController extends SbindController
   @Setter
   public Foo foo;
 
+  @SbindData
+  @Getter
+  @Setter
+  public boolean bool;
+
   @FXML
   @SbindControl(property = "value", expression = "foo.color", converter = ColorToPaintConverter.class)
   public ColorPicker copColor;
+
+  @FXML
+  @SbindControl(property = "selected", expression = "bool")
+  public CheckBox cbxBool;
 
   @FXML
   @SbindControl(expression = "str")
@@ -69,6 +78,8 @@ public class TestController extends SbindController
   @SneakyThrows
   public TestController()
   {
+    bool = true;
+
     foo = new Foo();
     Bar bar = new Bar();
     bar.setStrField("Bar String");

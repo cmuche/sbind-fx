@@ -190,8 +190,9 @@ public abstract class SbindController
   private Method getGetterMethod(Object o, String field) throws Exception
   {
     String mName = ("get" + field).toLowerCase();
+    String mNameAlt = ("is" + field).toLowerCase();
     Method method = Arrays.asList(o.getClass().getDeclaredMethods()).stream()
-      .filter(x -> x.getName().toLowerCase().equals(mName) && x.getParameterCount() == 0)
+      .filter(x -> (x.getName().toLowerCase().equals(mName) || (x.getReturnType() == boolean.class && x.getName().toLowerCase().equals(mNameAlt))) && x.getParameterCount() == 0)
       .findFirst().orElse(null);
 
     if (method == null)
