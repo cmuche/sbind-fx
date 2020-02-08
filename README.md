@@ -68,7 +68,7 @@ public TableView tblTable;
   })
   public TableView tblTable;
 ```
-The converter produces a TextField. The ```textProperty``` is automatically bound to the data source.
+The converter produces a TextField. Its ```textProperty``` is automatically bound to the data source.
 
 ### Data Source Changes
 When the data changes, an update can be triggered via the ```change(...)``` method:
