@@ -7,16 +7,18 @@ import de.cmuche.sbindfx.annotations.SbindData;
 import de.cmuche.sbindfx.annotations.SbindTable;
 import de.cmuche.sbindfx.converters.BufferedImageToImageViewConverter;
 import de.cmuche.sbindfx.converters.CollectionToObservableListConverter;
+import de.cmuche.sbindfx.converters.ColorToPaintConverter;
 import de.cmuche.sbindfx.converters.DateToLocalDateConverter;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.TextField;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.SneakyThrows;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -26,10 +28,21 @@ import java.util.List;
 public class TestController extends SbindController
 {
   @SbindData
+  @Getter
+  @Setter
+  public String str = "String";
+
+  @SbindData
+  @Getter
+  @Setter
   public Foo foo;
 
   @FXML
-  @SbindControl(expression = "foo.strField")
+  @SbindControl(property = "value", expression = "foo.color", converter = ColorToPaintConverter.class)
+  public ColorPicker copColor;
+
+  @FXML
+  @SbindControl(expression = "str")
   public TextField lblFoo;
 
   @FXML
@@ -62,6 +75,7 @@ public class TestController extends SbindController
     foo.setStrField("Foo String");
     foo.setBar(bar);
     foo.setDateField(new Date());
+    foo.setColor(Color.CYAN);
 
     List<String> list = new ArrayList<>();
     list.add("one");

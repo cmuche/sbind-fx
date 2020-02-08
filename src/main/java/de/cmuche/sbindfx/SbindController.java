@@ -93,12 +93,13 @@ public abstract class SbindController
       SbindControl bindAnn = colAnn.binding();
       col.setCellValueFactory(param ->
       {
-        Object dataValue = getDataValue(bindAnn.expression(), getObjectField(((TableColumn.CellDataFeatures) param).getValue(), splitExpression(bindAnn.expression())[0]));
+        Object rowValue = ((TableColumn.CellDataFeatures) param).getValue();
+        Object dataValue = traverseExpressionGet(rowValue, bindAnn.expression());
 
-        SbindConverter converter1 = generateConverter(bindAnn.converter());
-        SimpleObjectProperty fxProp1 = new SimpleObjectProperty(converter1.convert(dataValue));
-        fxProp1.addListener((observable, oldValue, newValue) -> valueChangedTable(ann.expression(), bindAnn.expression(), converter1, newValue));
-        return fxProp1;
+        SbindConverter bindCconverter = generateConverter(bindAnn.converter());
+        SimpleObjectProperty bindProp = new SimpleObjectProperty(bindCconverter.convert(dataValue));
+        bindProp.addListener((observable, oldValue, newValue) -> valueChangedTable(dataValue, bindAnn.expression(), bindCconverter, newValue));
+        return bindProp;
       });
     }
   }
@@ -122,7 +123,7 @@ public abstract class SbindController
       if (field != null && !expBase.equals(field))
         continue;
 
-      Object val = getDataValue(prop.getExpression(), dataSources.get(splitExpression(prop.getExpression())[0]));
+      Object val = traverseExpressionGet(null, prop.getExpression());
       prop.getFxProperty().setValue(dataConverters.get(Pair.of(prop.getControl(), prop.getProperty())).convert(val));
     }
 
@@ -133,14 +134,12 @@ public abstract class SbindController
   {
     SbindProperty sProp = dataControls.stream().filter(x -> x.getControl() == control).findFirst().orElse(null);
     Object convertedValue = dataConverters.get(Pair.of(control, propName)).back(newValue);
-    setDataValue(sProp.getExpression(), convertedValue);
+    traverseExpressionSet(null, sProp.getExpression(), convertedValue);
   }
 
-  private void valueChangedTable(String tableExpression, String columnExpression, SbindConverter converter, Object newValue)
+  private void valueChangedTable(Object baseObject, String columnExpression, SbindConverter converter, Object newValue)
   {
-    String mergedExpression = tableExpression + "." + columnExpression;
-    Object convertedValue = converter.back(newValue);
-    setDataValue(mergedExpression, convertedValue);
+    traverseExpressionSet(baseObject, columnExpression, converter.convert(newValue));
   }
 
   @SneakyThrows
@@ -156,51 +155,61 @@ public abstract class SbindController
     controlProp.addListener((observable, oldValue, newValue) -> valueChanged(control, propertyName, newValue));
   }
 
-  @SneakyThrows
-  private Object getObjectField(Object o, String field)
-  {
-    String mName = ("get" + field).toLowerCase();
-    Method method = Arrays.asList(o.getClass().getDeclaredMethods()).stream()
-      .filter(x -> x.getName().toLowerCase().equals(mName) && x.getParameterCount() == 0)
-      .findFirst().orElse(null);
-    return method.invoke(o);
-  }
-
-  @SneakyThrows
-  private void setObjectField(Object o, String field, Object data)
-  {
-    String mName = ("set" + field).toLowerCase();
-    Method method = Arrays.asList(o.getClass().getDeclaredMethods()).stream()
-      .filter(x -> x.getName().toLowerCase().equals(mName) && x.getParameterCount() == 1)
-      .findFirst().orElse(null);
-    method.invoke(o, data);
-  }
-
-  private Object getDataValue(String expression, Object o)
-  {
-    String[] exParts = splitExpression(expression);
-    Object currentObj = o;
-    for (int i = 1; i < exParts.length; i++)
-    {
-      currentObj = getObjectField(currentObj, exParts[i]);
-      if (currentObj == null)
-        return null;
-    }
-    return currentObj;
-  }
-
   private String[] splitExpression(String expression)
   {
     return expression.split("\\.");
   }
 
-  public void setDataValue(String expression, Object data)
+  @SneakyThrows
+  private Object traverseExpressionGet(Object baseObject, String expression)
   {
     String[] exParts = splitExpression(expression);
-    Object currentObj = dataSources.get(exParts[0]);
-    for (int i = 1; i < exParts.length - 1; i++)
-      currentObj = getObjectField(currentObj, exParts[i]);
+    Object currentObj = (baseObject == null) ? this : baseObject;
 
-    setObjectField(currentObj, exParts[exParts.length - 1], data);
+    for (int i = 0; i < exParts.length; i++)
+      currentObj = getGetterMethod(currentObj, exParts[i]).invoke(currentObj);
+
+    return currentObj;
+  }
+
+  @SneakyThrows
+  private void traverseExpressionSet(Object baseObject, String expression, Object value)
+  {
+    String[] exParts = splitExpression(expression);
+    Object currentObj = (baseObject == null) ? this : baseObject;
+
+    for (int i = 0; i < exParts.length; i++)
+    {
+      if (i == exParts.length - 1)
+        getSetterMethod(currentObj, exParts[i]).invoke(currentObj, value);
+      else
+        currentObj = getGetterMethod(currentObj, exParts[i]).invoke(currentObj);
+    }
+  }
+
+  private Method getGetterMethod(Object o, String field) throws Exception
+  {
+    String mName = ("get" + field).toLowerCase();
+    Method method = Arrays.asList(o.getClass().getDeclaredMethods()).stream()
+      .filter(x -> x.getName().toLowerCase().equals(mName) && x.getParameterCount() == 0)
+      .findFirst().orElse(null);
+
+    if (method == null)
+      throw new Exception("No Getter found: " + mName);
+
+    return method;
+  }
+
+  private Method getSetterMethod(Object o, String field) throws Exception
+  {
+    String mName = ("set" + field).toLowerCase();
+    Method method = Arrays.asList(o.getClass().getDeclaredMethods()).stream()
+      .filter(x -> x.getName().toLowerCase().equals(mName) && x.getParameterCount() == 1)
+      .findFirst().orElse(null);
+
+    if (method == null)
+      throw new Exception("No Setter found: " + mName);
+
+    return method;
   }
 }
