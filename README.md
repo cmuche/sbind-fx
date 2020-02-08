@@ -60,6 +60,16 @@ public DatePicker dapBaz;
 public TableView tblTable;
 ```
 
+##### Editable Table Cell example
+```
+@FXML
+  @SbindTable(expression = "foo.baz", columns = {
+    @SbindColumn(title = "Column", binding = @SbindControl(expression = "editField", property = "text", converter = TextToTextFieldConverter.class))
+  })
+  public TableView tblTable;
+```
+The converter produces a TextField. The ```textProperty``` is automatically bound to the data source.
+
 ### Data Source Changes
 When the data changes, an update can be triggered via the ```change(...)``` method:
 
