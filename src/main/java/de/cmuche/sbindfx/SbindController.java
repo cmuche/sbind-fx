@@ -7,10 +7,8 @@ import de.cmuche.sbindfx.annotations.SbindTable;
 import de.cmuche.sbindfx.converters.CollectionToObservableListConverter;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.util.Callback;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -92,23 +90,16 @@ public abstract class SbindController
       TableColumn col = new TableColumn(colAnn.title());
       tableView.getColumns().add(col);
 
-      for (SbindControl bindAnn : colAnn.bindings())
+      SbindControl bindAnn = colAnn.binding();
+      col.setCellValueFactory(param ->
       {
-        col.setCellValueFactory(new Callback<TableColumn.CellDataFeatures, ObservableValue>()
-        {
-          @Override
-          public ObservableValue call(TableColumn.CellDataFeatures param)
-          {
-            Object dataValue = getDataValue(bindAnn.expression(), getObjectField(param.getValue(), splitExpression(bindAnn.expression())[0]));
+        Object dataValue = getDataValue(bindAnn.expression(), getObjectField(((TableColumn.CellDataFeatures) param).getValue(), splitExpression(bindAnn.expression())[0]));
 
-            SbindConverter converter = generateConverter(bindAnn.converter());
-            SimpleObjectProperty fxProp = new SimpleObjectProperty(converter.convert(dataValue));
-            fxProp.addListener((observable, oldValue, newValue) -> valueChangedTable(ann.expression(), bindAnn.expression(), converter, newValue));
-            return fxProp;
-          }
-        });
-
-      }
+        SbindConverter converter1 = generateConverter(bindAnn.converter());
+        SimpleObjectProperty fxProp1 = new SimpleObjectProperty(converter1.convert(dataValue));
+        fxProp1.addListener((observable, oldValue, newValue) -> valueChangedTable(ann.expression(), bindAnn.expression(), converter1, newValue));
+        return fxProp1;
+      });
     }
   }
 

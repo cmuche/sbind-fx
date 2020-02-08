@@ -8,5 +8,5 @@ public @interface SbindColumn
 {
   String title();
 
-  SbindControl[] bindings();
+  SbindControl binding();
 }

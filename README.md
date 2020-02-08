@@ -45,10 +45,10 @@ public DatePicker dapBaz;
 ```
 @FXML
 @SbindTable(expression = "foo.baz", columns = {
-  @SbindColumn(title = "Column One", bindings = {@SbindControl(expression = "fieldOne")}),
-  @SbindColumn(title = "Column Two", bindings = {@SbindControl(expression = "fieldTwo")}),
-  @SbindColumn(title = "Column Three", bindings = {@SbindControl(expression = "fieldThree")}),
-  @SbindColumn(title = "Image Column", bindings = {@SbindControl(expression = "image", converter = BufferedImageToImageViewConverter.class)})
+  @SbindColumn(title = "Column One", binding = @SbindControl(expression = "fieldOne")),
+  @SbindColumn(title = "Column Two", binding = @SbindControl(expression = "fieldTwo")),
+  @SbindColumn(title = "Column Three", binding = @SbindControl(expression = "fieldThree")),
+  @SbindColumn(title = "Image Column", binding = @SbindControl(expression = "image", converter = BufferedImageToImageViewConverter.class))
 })
 public TableView tblTable;
 ```
