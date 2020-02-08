@@ -1,3 +1,5 @@
+[![Maven Central](https://img.shields.io/maven-central/v/de.cmuche/sbind-fx.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22de.cmuche%22%20AND%20a:%22sbind-fx%22)
+
 # sBind-FX
 ## Simple JavaFX *bidirectional* Data Binding
 
