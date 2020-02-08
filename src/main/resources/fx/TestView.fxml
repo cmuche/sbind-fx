@@ -3,14 +3,14 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="517.0" prefWidth="746.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.cmuche.sbindfxtest.TestController">
+<AnchorPane prefHeight="517.0" prefWidth="908.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.cmuche.sbindfxtest.TestController">
     <children>
         <Button fx:id="btnClick" layoutX="10.0" layoutY="10.0" onAction="#click" text="Print Object" />
         <TextField fx:id="lblFoo" layoutX="150.0" layoutY="10.0" />
         <TextField fx:id="lblBar" layoutX="150.0" layoutY="50.0" />
         <DatePicker fx:id="dapBaz" layoutX="150.0" layoutY="90.0" />
         <ListView fx:id="lstList" layoutX="150.0" layoutY="130.0" prefHeight="200.0" prefWidth="200.0" />
-        <TableView fx:id="tblTable" layoutX="386.0" layoutY="15.0" prefHeight="316.0" prefWidth="346.0">
+        <TableView fx:id="tblTable" layoutX="386.0" layoutY="15.0" prefHeight="316.0" prefWidth="503.0">
         </TableView>
       <ColorPicker fx:id="copColor" layoutX="150.0" layoutY="351.0" />
       <CheckBox fx:id="cbxBool" layoutX="150.0" layoutY="393.0" mnemonicParsing="false" text="CheckBox" />

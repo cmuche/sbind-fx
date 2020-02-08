@@ -5,10 +5,7 @@ import de.cmuche.sbindfx.annotations.SbindColumn;
 import de.cmuche.sbindfx.annotations.SbindControl;
 import de.cmuche.sbindfx.annotations.SbindData;
 import de.cmuche.sbindfx.annotations.SbindTable;
-import de.cmuche.sbindfx.converters.BufferedImageToImageViewConverter;
-import de.cmuche.sbindfx.converters.CollectionToObservableListConverter;
-import de.cmuche.sbindfx.converters.ColorToPaintConverter;
-import de.cmuche.sbindfx.converters.DateToLocalDateConverter;
+import de.cmuche.sbindfx.converters.*;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
@@ -70,7 +67,7 @@ public class TestController extends SbindController
   @SbindTable(expression = "foo.baz", columns = {
     @SbindColumn(title = "Column One", binding = @SbindControl(expression = "fieldOne")),
     @SbindColumn(title = "Column Two", binding = @SbindControl(expression = "fieldTwo")),
-    @SbindColumn(title = "Column Three", binding = @SbindControl(expression = "fieldThree")),
+    @SbindColumn(title = "Column Three", binding = @SbindControl(expression = "fieldThree", converter = TextToTextFieldConverter.class)),
     @SbindColumn(title = "Image Column", binding = @SbindControl(expression = "image", converter = BufferedImageToImageViewConverter.class))
   })
   public TableView tblTable;

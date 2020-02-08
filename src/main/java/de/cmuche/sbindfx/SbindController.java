@@ -50,7 +50,7 @@ public abstract class SbindController
           SbindControl annCtl = (SbindControl) ann;
           Object control = f.get(this);
           Property fxProp = new SimpleObjectProperty();
-          bindControlProperty(control, annCtl.property(), fxProp);
+          bindControlProperty(control, annCtl.property(), fxProp, true);
           SbindConverter converter = generateConverter(annCtl.converter());
 
           SbindProperty prop = new SbindProperty(control, annCtl.expression(), annCtl.property(), fxProp, converter);
@@ -79,7 +79,7 @@ public abstract class SbindController
   private void initializeTable(TableView tableView, SbindTable ann)
   {
     Property fxProp = new SimpleObjectProperty();
-    bindControlProperty(tableView, "items", fxProp);
+    bindControlProperty(tableView, "items", fxProp, true);
     CollectionToObservableListConverter converter = new CollectionToObservableListConverter();
     SbindProperty prop = new SbindProperty(tableView, ann.expression(), "items", fxProp, converter);
     dataControls.add(prop);
@@ -97,8 +97,13 @@ public abstract class SbindController
         Object dataValue = traverseExpressionGet(rowValue, bindAnn.expression());
 
         SbindConverter bindConverter = generateConverter(bindAnn.converter());
-        SimpleObjectProperty bindProp = new SimpleObjectProperty(bindConverter.convert(dataValue));
-        bindProp.addListener((observable, oldValue, newValue) -> valueChangedTable(dataValue, bindAnn.expression(), bindConverter, newValue));
+        Object cellValue = bindConverter.convert(dataValue);
+        SimpleObjectProperty bindProp = new SimpleObjectProperty(cellValue);
+        SimpleObjectProperty rawProp = new SimpleObjectProperty(dataValue);
+
+        rawProp.addListener((observable, oldValue, newValue) -> valueChangedTable(rowValue, bindAnn.expression(), newValue));
+        bindControlProperty(cellValue, bindAnn.property(), rawProp, false);
+
         return bindProp;
       });
     }
@@ -137,22 +142,28 @@ public abstract class SbindController
     traverseExpressionSet(null, sProp.getExpression(), convertedValue);
   }
 
-  private void valueChangedTable(Object baseObject, String columnExpression, SbindConverter converter, Object newValue)
+  private void valueChangedTable(Object baseObject, String columnExpression, Object newValue)
   {
-    traverseExpressionSet(baseObject, columnExpression, converter.convert(newValue));
+    traverseExpressionSet(baseObject, columnExpression, newValue);
   }
 
   @SneakyThrows
-  private void bindControlProperty(Object control, String propertyName, Property property)
+  private void bindControlProperty(Object control, String propertyName, Property property, boolean addListener)
   {
     String methodName = (propertyName + "property").toLowerCase();
     Method[] methods = control.getClass().getMethods();
     Method m = Arrays.asList(methods).stream()
       .filter(x -> x.getName().toLowerCase().equals(methodName))
       .findFirst().orElse(null);
+
+    if (m == null)
+      return;
+
     Property controlProp = ((Property) m.invoke(control));
     controlProp.bindBidirectional(property);
-    controlProp.addListener((observable, oldValue, newValue) -> valueChanged(control, propertyName, newValue));
+
+    if (addListener)
+      controlProp.addListener((observable, oldValue, newValue) -> valueChanged(control, propertyName, newValue));
   }
 
   private String[] splitExpression(String expression)
