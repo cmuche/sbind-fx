@@ -81,11 +81,11 @@ public abstract class SbindController
 
   private void initializeTable(TableView tableView, SbindTable ann)
   {
-    Property fxProp = new SimpleObjectProperty();
-    bindControlProperty(tableView, "items", fxProp);
-    SbindProperty prop = new SbindProperty(tableView, ann.expression(), "items", fxProp, new ListConverter());
-    dataControls.add(prop);
-    dataConverters.put(Pair.of(tableView, "items"), new ListConverter());
+      Property fxProp = new SimpleObjectProperty();
+      bindControlProperty(tableView, "items", fxProp);
+      SbindProperty prop = new SbindProperty(tableView, ann.expression(), "items", fxProp, new ListConverter());
+      dataControls.add(prop);
+      dataConverters.put(Pair.of(tableView, "items"), new ListConverter());
 
     for (SbindColumn colAnn : ann.columns())
     {
@@ -134,6 +134,8 @@ public abstract class SbindController
       Object val = getDataValue(prop.getExpression(), dataSources.get(splitExpression(prop.getExpression())[0]));
       prop.getFxProperty().setValue(dataConverters.get(Pair.of(prop.getControl(), prop.getProperty())).convert(val));
     }
+
+    dataTables.stream().forEach(x -> x.getLeft().refresh());
   }
 
   private void valueChanged(Object control, String propName, Object newValue)

@@ -39,9 +39,9 @@ public class TestController extends SbindController
 
   @FXML
   @SbindTable(expression = "foo.baz", columns = {
-    @SbindColumn(title = "Column One", bindings = {@SbindControl(property = "text", expression = "fieldOne")}),
-    @SbindColumn(title = "Column Two", bindings = {@SbindControl(property = "text", expression = "fieldTwo")}),
-    @SbindColumn(title = "Column Three", bindings = {@SbindControl(property = "text", expression = "fieldThree")})
+    @SbindColumn(title = "Column One", bindings = {@SbindControl(expression = "fieldOne", converter = CaseConverter.class)}),
+    @SbindColumn(title = "Column Two", bindings = {@SbindControl( expression = "fieldTwo")}),
+    @SbindColumn(title = "Column Three", bindings = {@SbindControl(expression = "fieldThree")})
   })
   public TableView tblTable;
 
@@ -70,6 +70,8 @@ public class TestController extends SbindController
   @FXML
   private void click(ActionEvent event) throws Exception
   {
+    foo.getBaz().get(0).setFieldOne("new value");
+    changed(null);
     System.out.println(foo);
   }
 
