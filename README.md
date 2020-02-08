@@ -4,13 +4,13 @@
 ## Simple JavaFX *bidirectional* Data Binding
 
 ### Create Controller
-Add the controller class to the ```.fxml``` file
 ```
 public class MyController extends SbindController
 {
 }
 ```
 
+Add the controller class to the ```.fxml``` file
 ```
 fx:controller="MyController"
 ```
