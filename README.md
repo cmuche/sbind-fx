@@ -63,10 +63,10 @@ public TableView tblTable;
 ##### Editable Table Cell example
 ```
 @FXML
-  @SbindTable(expression = "foo.baz", columns = {
-    @SbindColumn(title = "Column", binding = @SbindControl(expression = "editField", property = "text", converter = TextToTextFieldConverter.class))
-  })
-  public TableView tblTable;
+@SbindTable(expression = "foo.baz", columns = {
+  @SbindColumn(title = "Column", binding = @SbindControl(expression = "editField", property = "text", converter = TextToTextFieldConverter.class))
+})
+public TableView tblTable;
 ```
 The converter produces a ```TextField```. Its ```textProperty``` is automatically bound to the data source.
 
