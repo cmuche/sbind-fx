@@ -1,4 +1,4 @@
-package de.cmuche.sbindfxtest;
+package de.cmuche.sbindfx.converters;
 
 import de.cmuche.sbindfx.SbindConverter;
 
@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 
-public class DateConverter implements SbindConverter<Date, LocalDate>
+public class DateToLocalDateConverter implements SbindConverter<Date, LocalDate>
 {
   @Override
   public LocalDate convert(Date date)

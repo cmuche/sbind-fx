@@ -1,4 +1,4 @@
-package de.cmuche.sbindfxtest;
+package de.cmuche.sbindfx.converters;
 
 import de.cmuche.sbindfx.SbindConverter;
 import javafx.collections.FXCollections;
@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ListConverter implements SbindConverter<Collection, ObservableList>
+public class CollectionToObservableListConverter implements SbindConverter<Collection, ObservableList>
 {
 
   @Override
