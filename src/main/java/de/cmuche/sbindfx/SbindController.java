@@ -51,7 +51,7 @@ public abstract class SbindController
         if (ann instanceof SbindControl)
         {
           SbindControl annCtl = (SbindControl) ann;
-          Control control = (Control) f.get(this);
+          Object control = f.get(this);
           Property fxProp = new SimpleObjectProperty();
           bindControlProperty(control, annCtl.property(), fxProp);
           SbindConverter converter = generateConverter(annCtl.converter());
