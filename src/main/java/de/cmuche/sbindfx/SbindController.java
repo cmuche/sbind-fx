@@ -33,7 +33,6 @@ public abstract class SbindController
 
     for (Field f : getClass().getDeclaredFields())
     {
-
       //DATA
       doForEachAnnotationWithType(f, SbindData.class, ann ->
       {
