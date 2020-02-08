@@ -4,11 +4,10 @@ import de.cmuche.sbindfx.annotations.SbindColumn;
 import de.cmuche.sbindfx.annotations.SbindControl;
 import de.cmuche.sbindfx.annotations.SbindData;
 import de.cmuche.sbindfx.annotations.SbindTable;
-import de.cmuche.sbindfxtest.ListConverter;
+import de.cmuche.sbindfx.converters.CollectionToObservableListConverter;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.scene.control.Control;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.util.Callback;
@@ -81,11 +80,12 @@ public abstract class SbindController
 
   private void initializeTable(TableView tableView, SbindTable ann)
   {
-      Property fxProp = new SimpleObjectProperty();
-      bindControlProperty(tableView, "items", fxProp);
-      SbindProperty prop = new SbindProperty(tableView, ann.expression(), "items", fxProp, new ListConverter());
-      dataControls.add(prop);
-      dataConverters.put(Pair.of(tableView, "items"), new ListConverter());
+    Property fxProp = new SimpleObjectProperty();
+    bindControlProperty(tableView, "items", fxProp);
+    CollectionToObservableListConverter converter = new CollectionToObservableListConverter();
+    SbindProperty prop = new SbindProperty(tableView, ann.expression(), "items", fxProp, converter);
+    dataControls.add(prop);
+    dataConverters.put(Pair.of(tableView, "items"), converter);
 
     for (SbindColumn colAnn : ann.columns())
     {
