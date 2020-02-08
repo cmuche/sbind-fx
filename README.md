@@ -41,6 +41,13 @@ public TextField txtBar;
 public DatePicker dapBaz;
 ```
 
+#### JavaFX Lists
+```
+  @FXML
+  @SbindControl(property = "items", expression = "foo.listField", converter = CollectionToObservableListConverter.class)
+  public ListView lstList;
+```
+
 #### JavaFX Tables
 ```
 @FXML
@@ -53,7 +60,7 @@ public DatePicker dapBaz;
 public TableView tblTable;
 ```
 
-### Data Source changes
+### Data Source Changes
 When the data changes, an update can be triggered via the ```change(...)``` method:
 
 ```
