@@ -1,7 +1,6 @@
 package de.cmuche.sbindfx.converters;
 
 import de.cmuche.sbindfx.SbindConverter;
-import javafx.scene.paint.Paint;
 
 import java.awt.*;
 
