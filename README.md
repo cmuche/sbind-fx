@@ -53,6 +53,15 @@ public DatePicker dapBaz;
 public TableView tblTable;
 ```
 
+### Data Source changes
+When the data changes, an update can be triggered via the ```change(...)``` method:
+
+```
+change(null); //Triggers updates for all defined data sources
+change("foo");
+change("bar");
+```
+
 ### Converters
 You can implement custom converters by using the ```SbindConverter``` interface:
 
