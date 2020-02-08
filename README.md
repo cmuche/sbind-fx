@@ -3,38 +3,72 @@
 # sBind-FX
 ## Simple JavaFX *bidirectional* Data Binding
 
+### Create Controller
+Add the controller class to the ```.fxml``` file
 ```
-public class TestController extends SbindController
+public class MyController extends SbindController
 {
-  @SbindData
-  public Foo foo;
+}
+```
 
-  @FXML
-  @SbindControl(property = "text", expression = "foo.strField")
-  public TextField lblFoo;
+```
+fx:controller="MyController"
+```
 
-  @FXML
-  @SbindControl(property = "text", expression = "foo.bar.strField")
-  public TextField lblBar;
+### Define Data Sources
+```
+@SbindData
+public Foo foo;
 
-  @FXML
-  @SbindControl(property = "value", expression = "foo.dateField", converter = DateConverter.class)
-  public DatePicker dapBaz;
+@SbindData
+public Bar bar;
+```
 
-  public TestController()
+### Define Bindings
+Important: Fields used in the expressions must have public getters/setters!
+#### JavaFX Controls
+```
+@FXML
+@SbindControl(expression = "foo.strField")
+public TextField txtFoo;
+
+@FXML
+@SbindControl(expression = "foo.bar.strField")
+public TextField txtBar;
+
+@FXML
+@SbindControl(property = "value", expression = "foo.dateField", converter = DateConverter.class)
+public DatePicker dapBaz;
+```
+
+#### JavaFX Tables
+```
+@FXML
+@SbindTable(expression = "foo.baz", columns = {
+  @SbindColumn(title = "Column One", bindings = {@SbindControl(expression = "fieldOne")}),
+  @SbindColumn(title = "Column Two", bindings = {@SbindControl(expression = "fieldTwo")}),
+  @SbindColumn(title = "Column Three", bindings = {@SbindControl(expression = "fieldThree")}),
+  @SbindColumn(title = "Image Column", bindings = {@SbindControl(expression = "image", converter = BufferedImageToImageViewConverter.class)})
+})
+public TableView tblTable;
+```
+
+### Converters
+You can implement custom converters by using the ```SbindConverter``` interface:
+
+```
+public class BufferedImageToImageConverter implements SbindConverter<BufferedImage, Image>
+{
+  @Override
+  public Image convert(BufferedImage bufferedImage)
   {
-    foo = new Foo();
-    Bar bar = new Bar();
-    bar.setStrField("Bar String");
-    foo.setStrField("Foo String");
-    foo.setBar(bar);
-    foo.setDateField(new Date());
+    return SwingFXUtils.toFXImage(bufferedImage, null);
   }
 
-  public void setFoo(Foo foo)
+  @Override
+  public BufferedImage back(Image image)
   {
-    this.foo = foo;
-    changed("foo");
+    return SwingFXUtils.fromFXImage(image, null);
   }
 }
 ```
