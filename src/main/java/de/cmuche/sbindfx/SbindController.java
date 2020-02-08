@@ -96,9 +96,9 @@ public abstract class SbindController
         Object rowValue = ((TableColumn.CellDataFeatures) param).getValue();
         Object dataValue = traverseExpressionGet(rowValue, bindAnn.expression());
 
-        SbindConverter bindCconverter = generateConverter(bindAnn.converter());
-        SimpleObjectProperty bindProp = new SimpleObjectProperty(bindCconverter.convert(dataValue));
-        bindProp.addListener((observable, oldValue, newValue) -> valueChangedTable(dataValue, bindAnn.expression(), bindCconverter, newValue));
+        SbindConverter bindConverter = generateConverter(bindAnn.converter());
+        SimpleObjectProperty bindProp = new SimpleObjectProperty(bindConverter.convert(dataValue));
+        bindProp.addListener((observable, oldValue, newValue) -> valueChangedTable(dataValue, bindAnn.expression(), bindConverter, newValue));
         return bindProp;
       });
     }
