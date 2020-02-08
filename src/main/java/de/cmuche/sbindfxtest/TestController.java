@@ -101,10 +101,8 @@ public class TestController extends SbindController
   }
 
   @FXML
-  private void click(ActionEvent event) throws Exception
+  private void click(ActionEvent event)
   {
-    foo.getBaz().remove(tblTable.getSelectionModel().getSelectedItem());
-    changed(null);
     System.out.println(foo);
   }
 

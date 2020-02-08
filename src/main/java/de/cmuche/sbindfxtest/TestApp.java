@@ -10,10 +10,6 @@ public class TestApp extends Application
 {
   public static void main(String[] args)
   {
-    /*TestController controller = new TestController();
-    controller.initialize();
-    System.out.println(controller.getDataValue("foo.bar.strField"));
-    controller.changed();*/
     launch();
   }
 
@@ -24,7 +20,7 @@ public class TestApp extends Application
     Parent root = loader.load();
 
     Stage stage = new Stage();
-    stage.setTitle("sBind FX");
+    stage.setTitle("sBind-FX");
     Scene scene = new Scene(root);
 
     stage.setScene(scene);
