@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 
 public abstract class SbindController
 {
-  private Map<String, Object> dataSources;
   private Set<SbindProperty> dataControls;
   private Map<Pair<Object, String>, SbindConverter> dataConverters;
   private Set<Pair<TableView, SbindTable>> dataTables;
@@ -28,20 +27,12 @@ public abstract class SbindController
 
   public void initialize()
   {
-    dataSources = new HashMap<>();
     dataControls = new HashSet<>();
     dataConverters = new HashMap<>();
     dataTables = new HashSet<>();
 
     for (Field f : getClass().getDeclaredFields())
     {
-      //DATA
-      doForEachAnnotationWithType(f, SbindData.class, ann ->
-      {
-        if (f.getDeclaredAnnotation(SbindData.class) != null)
-          dataSources.put(f.getName(), getFieldInstance(f, this));
-      });
-
       //CONTROLS
       doForEachAnnotationWithType(f, SbindControl.class, ann ->
       {
@@ -194,7 +185,7 @@ public abstract class SbindController
       if (currentObj == null)
         return null;
 
-      currentObj = getGetterMethod(currentObj, exParts[i]).invoke(currentObj);
+      currentObj = fieldGet(currentObj, exParts[i]);
     }
 
     return currentObj;
@@ -212,9 +203,37 @@ public abstract class SbindController
         return;
 
       if (i == exParts.length - 1)
-        getSetterMethod(currentObj, exParts[i]).invoke(currentObj, value);
+        fieldSet(currentObj, exParts[i], value);
       else
-        currentObj = getGetterMethod(currentObj, exParts[i]).invoke(currentObj);
+        currentObj = fieldGet(currentObj, exParts[i]);
+    }
+  }
+
+  @SneakyThrows
+  private Object fieldGet(Object o, String name)
+  {
+    try
+    {
+      Field f = o.getClass().getField(name);
+      return f.get(o);
+    }
+    catch (Exception ex)
+    {
+      return getGetterMethod(o, name).invoke(o);
+    }
+  }
+
+  @SneakyThrows
+  private void fieldSet(Object o, String name, Object value)
+  {
+    try
+    {
+      Field f = o.getClass().getField(name);
+      f.set(o, value);
+    }
+    catch (Exception ex)
+    {
+      getSetterMethod(o, name).invoke(o, value);
     }
   }
 

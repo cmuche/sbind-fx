@@ -3,15 +3,12 @@ package de.cmuche.sbindfxtest;
 import de.cmuche.sbindfx.SbindController;
 import de.cmuche.sbindfx.annotations.SbindColumn;
 import de.cmuche.sbindfx.annotations.SbindControl;
-import de.cmuche.sbindfx.annotations.SbindData;
 import de.cmuche.sbindfx.annotations.SbindTable;
 import de.cmuche.sbindfx.converters.*;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.scene.control.*;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.SneakyThrows;
 
 import javax.imageio.ImageIO;
@@ -24,19 +21,10 @@ import java.util.List;
 
 public class TestController extends SbindController
 {
-  @SbindData
-  @Getter
-  @Setter
   public String str = "String";
 
-  @SbindData
-  @Getter
-  @Setter
   public Foo foo;
 
-  @SbindData
-  @Getter
-  @Setter
   public boolean bool;
 
   @FXML
