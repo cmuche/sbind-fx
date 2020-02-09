@@ -190,7 +190,12 @@ public abstract class SbindController
     Object currentObj = (baseObject == null) ? this : baseObject;
 
     for (int i = 0; i < exParts.length; i++)
+    {
+      if (currentObj == null)
+        return null;
+
       currentObj = getGetterMethod(currentObj, exParts[i]).invoke(currentObj);
+    }
 
     return currentObj;
   }
@@ -203,6 +208,9 @@ public abstract class SbindController
 
     for (int i = 0; i < exParts.length; i++)
     {
+      if (currentObj == null)
+        return;
+
       if (i == exParts.length - 1)
         getSetterMethod(currentObj, exParts[i]).invoke(currentObj, value);
       else
