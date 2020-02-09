@@ -1,9 +1,6 @@
 package de.cmuche.sbindfx;
 
-import de.cmuche.sbindfx.annotations.SbindColumn;
-import de.cmuche.sbindfx.annotations.SbindControl;
-import de.cmuche.sbindfx.annotations.SbindData;
-import de.cmuche.sbindfx.annotations.SbindTable;
+import de.cmuche.sbindfx.annotations.*;
 import de.cmuche.sbindfx.converters.CollectionToObservableListConverter;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -12,10 +9,12 @@ import javafx.scene.control.TableView;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public abstract class SbindController
 {
@@ -77,7 +76,13 @@ public abstract class SbindController
   @SneakyThrows
   private void doForEachAnnotationWithType(Field field, Class annotaionClass, Consumer consumer)
   {
-    Arrays.asList(field.getDeclaredAnnotations()).stream().filter(x -> annotaionClass.isInstance(x)).forEach(consumer);
+    Set<Annotation> annos = Arrays.asList(field.getDeclaredAnnotations()).stream().filter(x -> annotaionClass.isInstance(x)).collect(Collectors.toSet());
+    if (annotaionClass == SbindControl.class)
+    {
+      Arrays.asList(field.getDeclaredAnnotations()).stream().filter(x -> SbindControls.class.isInstance(x)).forEach(x -> annos.addAll(Arrays.asList(((SbindControls) x).value())));
+    }
+
+    annos.forEach(consumer);
   }
 
   private void initializeTable(TableView tableView, SbindTable ann)
@@ -141,7 +146,7 @@ public abstract class SbindController
 
   private void valueChanged(Object control, String propName, Object newValue)
   {
-    SbindProperty sProp = dataControls.stream().filter(x -> x.getControl() == control).findFirst().orElse(null);
+    SbindProperty sProp = dataControls.stream().filter(x -> x.getControl() == control && x.getProperty().equals(propName)).findFirst().orElse(null);
     Object convertedValue = dataConverters.get(Pair.of(control, propName)).back(newValue);
     traverseExpressionSet(null, sProp.getExpression(), convertedValue);
   }
