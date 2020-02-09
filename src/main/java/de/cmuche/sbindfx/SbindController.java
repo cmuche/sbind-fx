@@ -79,10 +79,10 @@ public abstract class SbindController
   @SneakyThrows
   private void doForEachAnnotationWithType(Field field, Class annotaionClass, Consumer consumer)
   {
-    Set<Annotation> annos = Arrays.asList(field.getDeclaredAnnotations()).stream().filter(x -> annotaionClass.isInstance(x)).collect(Collectors.toSet());
+    Set<Annotation> annos = Arrays.asList(field.getDeclaredAnnotations()).stream().filter(annotaionClass::isInstance).collect(Collectors.toSet());
     if (annotaionClass == SbindControl.class)
     {
-      Arrays.asList(field.getDeclaredAnnotations()).stream().filter(x -> SbindControls.class.isInstance(x)).forEach(x -> annos.addAll(Arrays.asList(((SbindControls) x).value())));
+      Arrays.asList(field.getDeclaredAnnotations()).stream().filter(SbindControls.class::isInstance).forEach(x -> annos.addAll(Arrays.asList(((SbindControls) x).value())));
     }
 
     annos.forEach(consumer);
@@ -162,10 +162,10 @@ public abstract class SbindController
   @SneakyThrows
   private void bindControlProperty(Object control, String propertyName, Property property, boolean addListener)
   {
-    String methodName = (propertyName + "property").toLowerCase();
+    String methodName = (propertyName + "property");
     Method[] methods = control.getClass().getMethods();
     Method m = Arrays.asList(methods).stream()
-      .filter(x -> x.getName().toLowerCase().equals(methodName))
+      .filter(x -> x.getName().equalsIgnoreCase(methodName))
       .findFirst().orElse(null);
 
     if (m == null)
@@ -212,10 +212,10 @@ public abstract class SbindController
 
   private Method getGetterMethod(Object o, String field) throws Exception
   {
-    String mName = ("get" + field).toLowerCase();
-    String mNameAlt = ("is" + field).toLowerCase();
+    String mName = ("get" + field);
+    String mNameAlt = ("is" + field);
     Method method = Arrays.asList(o.getClass().getDeclaredMethods()).stream()
-      .filter(x -> (x.getName().toLowerCase().equals(mName) || (x.getReturnType() == boolean.class && x.getName().toLowerCase().equals(mNameAlt))) && x.getParameterCount() == 0)
+      .filter(x -> (x.getName().equalsIgnoreCase(mName) || (x.getReturnType() == boolean.class && x.getName().equalsIgnoreCase(mNameAlt))) && x.getParameterCount() == 0)
       .findFirst().orElse(null);
 
     if (method == null)
@@ -226,9 +226,9 @@ public abstract class SbindController
 
   private Method getSetterMethod(Object o, String field) throws Exception
   {
-    String mName = ("set" + field).toLowerCase();
+    String mName = ("set" + field);
     Method method = Arrays.asList(o.getClass().getDeclaredMethods()).stream()
-      .filter(x -> x.getName().toLowerCase().equals(mName) && x.getParameterCount() == 1)
+      .filter(x -> x.getName().equalsIgnoreCase(mName) && x.getParameterCount() == 1)
       .findFirst().orElse(null);
 
     if (method == null)
