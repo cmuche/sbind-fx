@@ -41,6 +41,15 @@ public TextField txtBar;
 public DatePicker dapBaz;
 ```
 
+##### Repeatable Annotations
+Multiple property bindings are also possible:
+```
+  @FXML
+  @SbindControl(property = "disable", expression = "bool")
+  @SbindControl(property = "text", expression = "str")
+  public TextField lblFoo;
+```
+
 #### JavaFX Lists
 ```
   @FXML
