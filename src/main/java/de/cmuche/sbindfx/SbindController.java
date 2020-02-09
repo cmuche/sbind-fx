@@ -23,6 +23,8 @@ public abstract class SbindController
   private Map<Pair<Object, String>, SbindConverter> dataConverters;
   private Set<Pair<TableView, SbindTable>> dataTables;
 
+  private static final SbindConverter NULL_CONVERTER = new SbindNullConverter();
+
   public void initialize()
   {
     dataSources = new HashMap<>();
@@ -122,7 +124,7 @@ public abstract class SbindController
   private SbindConverter generateConverter(Class converterClass)
   {
     if (converterClass == Object.class)
-      return new SbindNullConverter();
+      return NULL_CONVERTER;
 
     Object converter = converterClass.getConstructor().newInstance();
     return (SbindConverter) converter;
