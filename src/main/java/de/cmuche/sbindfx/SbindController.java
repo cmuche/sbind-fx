@@ -24,6 +24,7 @@ public abstract class SbindController
   private Set<Pair<TableView, SbindTable>> dataTables;
 
   private static final SbindConverter NULL_CONVERTER = new SbindNullConverter();
+  private static final String LIST_ITEMS_PROPERTY = "items";
 
   public void initialize()
   {
@@ -90,11 +91,11 @@ public abstract class SbindController
   private void initializeTable(TableView tableView, SbindTable ann)
   {
     Property fxProp = new SimpleObjectProperty();
-    bindControlProperty(tableView, "items", fxProp, true);
+    bindControlProperty(tableView, LIST_ITEMS_PROPERTY, fxProp, true);
     CollectionToObservableListConverter converter = new CollectionToObservableListConverter();
-    SbindProperty prop = new SbindProperty(tableView, ann.expression(), "items", fxProp, converter);
+    SbindProperty prop = new SbindProperty(tableView, ann.expression(), LIST_ITEMS_PROPERTY, fxProp, converter);
     dataControls.add(prop);
-    dataConverters.put(Pair.of(tableView, "items"), converter);
+    dataConverters.put(Pair.of(tableView, LIST_ITEMS_PROPERTY), converter);
 
     for (SbindColumn colAnn : ann.columns())
     {
