@@ -15,8 +15,7 @@ public class DateToLocalDateConverter implements SbindConverter<Date, LocalDate>
   {
     Instant instant = Instant.ofEpochMilli(date.getTime());
     LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
-    LocalDate localDate = localDateTime.toLocalDate();
-    return localDate;
+    return localDateTime.toLocalDate();
   }
 
   @Override
