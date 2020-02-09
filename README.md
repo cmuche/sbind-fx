@@ -15,17 +15,8 @@ Add the controller class to the ```.fxml``` file
 fx:controller="MyController"
 ```
 
-### Define Data Sources
-```
-@SbindData
-public Foo foo;
-
-@SbindData
-public Bar bar;
-```
-
 ### Define Bindings
-Important: Fields used in the expressions must have public getters/setters!
+Important: Fields used in the expressions must have public **getters and setters** or must be **public amd non-final fields**!
 #### JavaFX Controls
 ```
 @FXML
