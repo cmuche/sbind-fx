@@ -10,7 +10,7 @@
 
     <groupId>de.cmuche</groupId>
     <artifactId>sbind-fx</artifactId>
-    <version>1.5</version>
+    <version>1.6</version>
     <packaging>jar</packaging>
 
     <developers>
