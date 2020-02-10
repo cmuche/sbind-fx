@@ -137,7 +137,9 @@ public abstract class SbindController
         continue;
 
       Object val = traverseExpressionGet(null, prop.getExpression());
-      prop.getFxProperty().setValue(dataConverters.get(Pair.of(prop.getControl(), prop.getProperty())).convert(val));
+
+      SbindConverter converter = dataConverters.get(Pair.of(prop.getControl(), prop.getProperty()));
+      prop.getFxProperty().setValue(val == null ? null : converter.convert(val));
     }
 
     dataTables.stream().forEach(x -> x.getLeft().refresh());
