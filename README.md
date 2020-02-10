@@ -16,7 +16,7 @@ fx:controller="MyController"
 ```
 
 ### Define Bindings
-Important: Fields used in the expressions must have public **getters and setters** or must be **public amd non-final fields**!
+Important: Fields used in the expressions must have public **getters and setters** or must be **public and non-final fields**!
 #### JavaFX Controls
 ```
 @FXML
@@ -74,9 +74,9 @@ The converter produces a ```TextField```. Its ```textProperty``` is automaticall
 When the data changes, an update can be triggered via the ```change(...)``` method:
 
 ```
-change(null); //Triggers updates for all defined data sources
-change("foo");
-change("bar");
+change(null); // Triggers updates for all defined controls and tables
+change("foo"); // Variable foo changed
+change("bar"); // Variable bar changed
 ```
 
 ### Converters
