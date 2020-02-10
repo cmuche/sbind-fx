@@ -85,6 +85,7 @@ public class TestController extends SbindController
     bList.add(new Baz("one", "two", "three", image));
     bList.add(new Baz("four", "five", "six", image));
     bList.add(new Baz("seven", "eight", "nine", image));
+    bList.add(new Baz(null, null, null, image));
     foo.setBaz(bList);
   }
 

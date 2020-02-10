@@ -1,6 +1,9 @@
 package de.cmuche.sbindfx;
 
-import de.cmuche.sbindfx.annotations.*;
+import de.cmuche.sbindfx.annotations.SbindColumn;
+import de.cmuche.sbindfx.annotations.SbindControl;
+import de.cmuche.sbindfx.annotations.SbindControls;
+import de.cmuche.sbindfx.annotations.SbindTable;
 import de.cmuche.sbindfx.converters.CollectionToObservableListConverter;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -105,7 +108,9 @@ public abstract class SbindController
         SimpleObjectProperty rawProp = new SimpleObjectProperty(dataValue);
 
         rawProp.addListener((observable, oldValue, newValue) -> valueChangedTable(rowValue, bindAnn.expression(), newValue));
-        bindControlProperty(cellValue, bindAnn.property(), rawProp, false);
+
+        if (cellValue != null)
+          bindControlProperty(cellValue, bindAnn.property(), rawProp, false);
 
         return bindProp;
       });
