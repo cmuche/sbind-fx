@@ -9,4 +9,6 @@ public @interface SbindColumn
   String title();
 
   SbindControl binding();
+
+  boolean sortable() default true;
 }

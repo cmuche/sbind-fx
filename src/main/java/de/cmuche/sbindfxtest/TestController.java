@@ -56,7 +56,7 @@ public class TestController extends SbindController
     @SbindColumn(title = "Column One", binding = @SbindControl(expression = "fieldOne")),
     @SbindColumn(title = "Column Two", binding = @SbindControl(expression = "fieldTwo")),
     @SbindColumn(title = "Column Three", binding = @SbindControl(expression = "fieldThree", converter = TextToTextFieldConverter.class)),
-    @SbindColumn(title = "Image Column", binding = @SbindControl(expression = "image", converter = BufferedImageToImageViewConverter.class))
+    @SbindColumn(title = "Image Column", binding = @SbindControl(expression = "image", converter = BufferedImageToImageViewConverter.class), sortable = false)
   })
   public TableView tblTable;
 

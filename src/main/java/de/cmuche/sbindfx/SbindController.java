@@ -1,15 +1,13 @@
 package de.cmuche.sbindfx;
 
-import de.cmuche.sbindfx.annotations.SbindColumn;
-import de.cmuche.sbindfx.annotations.SbindControl;
-import de.cmuche.sbindfx.annotations.SbindControls;
-import de.cmuche.sbindfx.annotations.SbindTable;
+import de.cmuche.sbindfx.annotations.*;
 import de.cmuche.sbindfx.converters.CollectionToObservableListConverter;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.lang.annotation.Annotation;
@@ -24,6 +22,7 @@ public abstract class SbindController
   private Set<SbindProperty> dataControls;
   private Map<Pair<Object, String>, SbindConverter> dataConverters;
   private Set<Pair<TableView, SbindTable>> dataTables;
+  private Map<TableView, Map<Object, Object>> tableOriginalObjects;
 
   private static final SbindConverter NULL_CONVERTER = new SbindNullConverter();
   private static final String LIST_ITEMS_PROPERTY = "items";
@@ -33,6 +32,7 @@ public abstract class SbindController
     dataControls = new HashSet<>();
     dataConverters = new HashMap<>();
     dataTables = new HashSet<>();
+    tableOriginalObjects = new HashMap<>();
 
     for (Field f : getClass().getDeclaredFields())
     {
@@ -84,6 +84,11 @@ public abstract class SbindController
 
   private void initializeTable(TableView tableView, SbindTable ann)
   {
+    if (tableOriginalObjects.containsKey(tableView))
+      tableOriginalObjects.get(tableView).clear();
+    else
+      tableOriginalObjects.put(tableView, new HashMap<>());
+
     Property fxProp = new SimpleObjectProperty();
     bindControlProperty(tableView, LIST_ITEMS_PROPERTY, fxProp, true);
     CollectionToObservableListConverter converter = new CollectionToObservableListConverter();
@@ -97,15 +102,19 @@ public abstract class SbindController
       tableView.getColumns().add(col);
 
       SbindControl bindAnn = colAnn.binding();
+      SbindConverter bindConverter = generateConverter(bindAnn.converter());
+
       col.setCellValueFactory(param ->
       {
         Object rowValue = ((TableColumn.CellDataFeatures) param).getValue();
         Object dataValue = traverseExpressionGet(rowValue, bindAnn.expression());
 
-        SbindConverter bindConverter = generateConverter(bindAnn.converter());
         Object cellValue = bindConverter.convert(dataValue);
         SimpleObjectProperty bindProp = new SimpleObjectProperty(cellValue);
         SimpleObjectProperty rawProp = new SimpleObjectProperty(dataValue);
+
+        if (colAnn.sortable())
+          tableOriginalObjects.get(tableView).put(cellValue, dataValue);
 
         rawProp.addListener((observable, oldValue, newValue) -> valueChangedTable(rowValue, bindAnn.expression(), newValue));
 
@@ -114,6 +123,16 @@ public abstract class SbindController
 
         return bindProp;
       });
+
+      col.setSortable(colAnn.sortable());
+      if (colAnn.sortable())
+        col.setComparator((o1, o2) ->
+        {
+          Comparable b1 = (Comparable) tableOriginalObjects.get(tableView).get(o1);
+          Comparable b2 = (Comparable) tableOriginalObjects.get(tableView).get(o2);
+          return ObjectUtils.compare(b1, b2);
+        });
+
     }
   }
 
