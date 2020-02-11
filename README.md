@@ -54,7 +54,7 @@ Multiple property bindings are also possible:
 @SbindTable(expression = "foo.baz", columns = {
   @SbindColumn(title = "Column One", binding = @SbindControl(expression = "fieldOne")),
   @SbindColumn(title = "Column Two", binding = @SbindControl(expression = "fieldTwo")),
-  @SbindColumn(title = "Column Three", binding = @SbindControl(expression = "fieldThree")),
+  @SbindColumn(title = "Column Three", binding = @SbindControl(expression = "fieldThree"), sortable = false),
   @SbindColumn(title = "Image Column", binding = @SbindControl(expression = "image", converter = BufferedImageToImageViewConverter.class))
 })
 public TableView tblTable;
