@@ -51,7 +51,7 @@ Multiple property bindings are also possible:
 #### JavaFX Tables
 ```
 @FXML
-@SbindTable(expression = "foo.baz", columns = {
+@SbindTable(expression = "foo.baz", selected = "selectedBaz", columns = {
   @SbindColumn(title = "Column One", binding = @SbindControl(expression = "fieldOne")),
   @SbindColumn(title = "Column Two", binding = @SbindControl(expression = "fieldTwo")),
   @SbindColumn(title = "Column Three", binding = @SbindControl(expression = "fieldThree"), sortable = false),
