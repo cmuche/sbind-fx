@@ -8,5 +8,7 @@ public @interface SbindTable
 {
   String expression();
 
+  String selected() default "";
+
   SbindColumn[] columns();
 }

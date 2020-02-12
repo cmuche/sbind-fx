@@ -7,6 +7,7 @@ import de.cmuche.sbindfx.annotations.SbindTable;
 import de.cmuche.sbindfx.converters.*;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.*;
 import lombok.SneakyThrows;
@@ -27,6 +28,8 @@ public class TestController extends SbindController
 
   public boolean bool;
 
+  public Baz selectedBaz;
+
   @FXML
   @SbindControl(property = "value", expression = "foo.color", converter = ColorToPaintConverter.class)
   public ColorPicker copColor;
@@ -34,6 +37,10 @@ public class TestController extends SbindController
   @FXML
   @SbindControl(property = "selected", expression = "bool")
   public CheckBox cbxBool;
+
+  @FXML
+  @SbindControl(expression = "selectedBaz.fieldOne")
+  public Label lblSelected;
 
   @FXML
   @SbindControl(expression = "str")
@@ -52,7 +59,7 @@ public class TestController extends SbindController
   public ListView lstList;
 
   @FXML
-  @SbindTable(expression = "foo.baz", columns = {
+  @SbindTable(expression = "foo.baz", selected = "selectedBaz" ,columns = {
     @SbindColumn(title = "Column One", binding = @SbindControl(expression = "fieldOne")),
     @SbindColumn(title = "Column Two", binding = @SbindControl(expression = "fieldTwo")),
     @SbindColumn(title = "Column Three", binding = @SbindControl(expression = "fieldThree", converter = TextToTextFieldConverter.class)),
@@ -92,6 +99,7 @@ public class TestController extends SbindController
   @FXML
   private void click(ActionEvent event)
   {
+    System.out.println(selectedBaz);
     System.out.println(foo);
   }
 

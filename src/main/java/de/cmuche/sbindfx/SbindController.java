@@ -1,6 +1,9 @@
 package de.cmuche.sbindfx;
 
-import de.cmuche.sbindfx.annotations.*;
+import de.cmuche.sbindfx.annotations.SbindColumn;
+import de.cmuche.sbindfx.annotations.SbindControl;
+import de.cmuche.sbindfx.annotations.SbindControls;
+import de.cmuche.sbindfx.annotations.SbindTable;
 import de.cmuche.sbindfx.converters.CollectionToObservableListConverter;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -96,6 +99,9 @@ public abstract class SbindController
     dataControls.add(prop);
     dataConverters.put(Pair.of(tableView, LIST_ITEMS_PROPERTY), converter);
 
+    if (!ann.selected().isEmpty())
+      tableView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> valueChangedTableSelection(ann.selected(), newValue));
+
     for (SbindColumn colAnn : ann.columns())
     {
       TableColumn col = new TableColumn(colAnn.title());
@@ -174,6 +180,12 @@ public abstract class SbindController
   private void valueChangedTable(Object baseObject, String columnExpression, Object newValue)
   {
     traverseExpressionSet(baseObject, columnExpression, newValue);
+  }
+
+  private void valueChangedTableSelection(String expression, Object newValue)
+  {
+    traverseExpressionSet(null, expression, newValue);
+    changed(expression);
   }
 
   @SneakyThrows
