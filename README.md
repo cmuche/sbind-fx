@@ -70,6 +70,22 @@ public TableView tblTable;
 ```
 The converter produces a ```TextField```. Its ```textProperty``` is automatically bound to the data source.
 
+##### Table Actions
+```
+@FXML
+@SbindTable(expression = "foo.baz", action = "tableAction" columns = {
+  @SbindColumn(title = "Column", binding = @SbindControl(expression = "editField", property = "text", converter = TextToTextFieldConverter.class))
+})
+public TableView tblTable;
+
+public void tableAction(Baz baz)
+{
+  ...
+}
+```
+
+The method ```tableAction``` is called when a row in the table is double-clicked or when the enter key is pressed.
+
 ### Data Source Changes
 When the data changes, an update can be triggered via the ```change(...)``` method:
 
