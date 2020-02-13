@@ -39,7 +39,7 @@ public class TestController extends SbindController
   public CheckBox cbxBool;
 
   @FXML
-  @SbindControl(expression = "selectedBaz.fieldOne")
+  @SbindControl(expression = "selectedListItem")
   public Label lblSelected;
 
   @FXML
