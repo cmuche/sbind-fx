@@ -9,6 +9,8 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -99,6 +101,9 @@ public abstract class SbindController
     dataControls.add(prop);
     dataConverters.put(Pair.of(tableView, LIST_ITEMS_PROPERTY), converter);
 
+    if (!ann.action().isEmpty())
+      addTableActionListeners(tableView, ann);
+
     if (!ann.selected().isEmpty())
       tableView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> valueChangedTableSelection(ann.selected(), newValue));
 
@@ -140,6 +145,40 @@ public abstract class SbindController
         });
 
     }
+  }
+
+  @SneakyThrows
+  private void tableActionPerformed(TableView tableView, SbindTable ann)
+  {
+    Object selI = tableView.getSelectionModel().getSelectedItem();
+    if (selI == null)
+      return;
+
+    Method[] methods = getClass().getDeclaredMethods();
+    Method m = Arrays.asList(methods).stream()
+      .filter(x -> x.getName().equalsIgnoreCase(ann.action()) && x.getParameterCount() == 1)
+      .findFirst().orElse(null);
+
+    if (m == null)
+      throw new Exception("Action Method " + ann.action() + " not found");
+
+    m.invoke(this, selI);
+  }
+
+  private void addTableActionListeners(TableView tableView, SbindTable ann)
+  {
+    tableView.setOnMouseClicked(event ->
+    {
+      if (event.getButton() != MouseButton.PRIMARY || event.getClickCount() != 2)
+        return;
+      tableActionPerformed(tableView, ann);
+    });
+    tableView.setOnKeyPressed(event ->
+    {
+      if (!event.getCode().equals(KeyCode.ENTER))
+        return;
+      tableActionPerformed(tableView, ann);
+    });
   }
 
   @SneakyThrows

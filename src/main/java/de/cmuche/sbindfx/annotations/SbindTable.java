@@ -10,5 +10,7 @@ public @interface SbindTable
 
   String selected() default "";
 
+  String action() default "";
+
   SbindColumn[] columns();
 }

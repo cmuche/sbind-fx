@@ -59,13 +59,18 @@ public class TestController extends SbindController
   public ListView lstList;
 
   @FXML
-  @SbindTable(expression = "foo.baz", selected = "selectedBaz" ,columns = {
+  @SbindTable(expression = "foo.baz", selected = "selectedBaz", action = "tableAction",columns = {
     @SbindColumn(title = "Column One", binding = @SbindControl(expression = "fieldOne")),
     @SbindColumn(title = "Column Two", binding = @SbindControl(expression = "fieldTwo")),
     @SbindColumn(title = "Column Three", binding = @SbindControl(expression = "fieldThree", converter = TextToTextFieldConverter.class)),
     @SbindColumn(title = "Image Column", binding = @SbindControl(expression = "image", converter = BufferedImageToImageViewConverter.class), sortable = false)
   })
   public TableView tblTable;
+
+  public void tableAction(Baz e)
+  {
+    System.out.println(e);
+  }
 
   @SneakyThrows
   public TestController()
