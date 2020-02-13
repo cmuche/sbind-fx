@@ -44,7 +44,7 @@ Multiple property bindings are also possible:
 #### JavaFX Lists
 ```
   @FXML
-  @SbindControl(property = "items", expression = "foo.listField", converter = CollectionToObservableListConverter.class)
+  @SbindControl(property = "items", selected = "listSelectedItem", expression = "foo.listField", converter = CollectionToObservableListConverter.class)
   public ListView lstList;
 ```
 
