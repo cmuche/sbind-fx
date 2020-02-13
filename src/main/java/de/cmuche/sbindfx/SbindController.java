@@ -7,6 +7,7 @@ import de.cmuche.sbindfx.annotations.SbindTable;
 import de.cmuche.sbindfx.converters.CollectionToObservableListConverter;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.scene.control.SelectionModel;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.input.KeyCode;
@@ -105,7 +106,7 @@ public abstract class SbindController
       addTableActionListeners(tableView, ann);
 
     if (!ann.selected().isEmpty())
-      tableView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> valueChangedTableSelection(ann.selected(), newValue));
+      getSelectionModelProperty(tableView).selectedItemProperty().addListener((observable, oldValue, newValue) -> valueChangedTableSelection(ann.selected(), newValue));
 
     for (SbindColumn colAnn : ann.columns())
     {
@@ -145,6 +146,20 @@ public abstract class SbindController
         });
 
     }
+  }
+
+  @SneakyThrows
+  private SelectionModel getSelectionModelProperty(Object control)
+  {
+    Method[] methods = control.getClass().getDeclaredMethods();
+    Method m = Arrays.asList(methods).stream()
+      .filter(x -> x.getName().equals("getSelectionModel"))
+      .findFirst().orElse(null);
+
+    if (m == null)
+      throw new Exception("No Selection Model Property");
+
+    return (SelectionModel) m.invoke(control);
   }
 
   @SneakyThrows
