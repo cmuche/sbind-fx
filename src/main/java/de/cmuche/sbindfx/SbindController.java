@@ -6,6 +6,7 @@ import de.cmuche.sbindfx.annotations.SbindControls;
 import de.cmuche.sbindfx.annotations.SbindTable;
 import de.cmuche.sbindfx.converters.CollectionToObservableListConverter;
 import javafx.beans.property.Property;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.SelectionModel;
 import javafx.scene.control.TableColumn;
@@ -55,6 +56,12 @@ public abstract class SbindController
 
         dataControls.add(prop);
         dataConverters.put(Pair.of(control, annCtl.property()), converter);
+
+        if(!annCtl.selected().isEmpty())
+        {
+          ReadOnlyObjectProperty selItmProp = getSelectionModelProperty(control).selectedItemProperty();
+          selItmProp.addListener((observable, oldValue, newValue) -> valueChangedTableSelection(annCtl.selected(), newValue));
+        }
       });
 
       //TABLES

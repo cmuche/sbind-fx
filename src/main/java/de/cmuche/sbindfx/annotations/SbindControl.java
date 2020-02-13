@@ -12,5 +12,7 @@ public @interface SbindControl
 
   String property() default "text";
 
+  String selected() default "";
+
   Class converter() default Object.class;
 }
